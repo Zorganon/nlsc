@@ -1,0 +1,7 @@
+[06-Jul-2016 01:44:30 UTC] PHP Warning:  file_put_contents(/home/ubuntu/workspace/wp-content/uploads/sp-client-document-manager//.htaccess): failed to open stream: No such file or directory in /home/ubuntu/workspace/wp-content/plugins/sp-client-document-manager/cu.php on line 207
+[06-Jul-2016 01:44:30 UTC] PHP Stack trace:
+[06-Jul-2016 01:44:30 UTC] PHP   1. {main}() /home/ubuntu/workspace/wp-admin/plugins.php:0
+[06-Jul-2016 01:44:30 UTC] PHP   2. activate_plugin() /home/ubuntu/workspace/wp-admin/plugins.php:42
+[06-Jul-2016 01:44:30 UTC] PHP   3. include_once() /home/ubuntu/workspace/wp-admin/includes/plugin.php:552
+[06-Jul-2016 01:44:30 UTC] PHP   4. cdm_htaccess_protect_dir() /home/ubuntu/workspace/wp-content/plugins/sp-client-document-manager/cu.php:217
+[06-Jul-2016 01:44:30 UTC] PHP   5. file_put_contents() /home/ubuntu/workspace/wp-content/plugins/sp-client-document-manager/cu.php:207

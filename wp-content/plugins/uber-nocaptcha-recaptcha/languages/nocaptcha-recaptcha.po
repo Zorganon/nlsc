@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version:WPML_EXPORT\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language:en\n"
+"MIME-Version: 1.0\n"
+
+msgid " reCaptcha site key"
+msgstr ""
+
+msgid " reCaptcha secret key"
+msgstr ""
+
+msgid "Select reCaptcha skin"
+msgstr ""
+
+msgid "Enable reCaptcha on:"
+msgstr ""
+
+msgid "Get your noCaptcha reCaptcha keys <a href=\"https://www.google.com/recaptcha/\" target=\"_blank\">here</a>"
+msgstr ""
+
+msgid "A script with the same has already been registered. Plugin conflict"
+msgstr ""
+
+msgid "Site / Secrete key for Uber reCaptcha haven't yet been completed. Please go <a href=\"admin.php?page=uber-ncr-settings\">here</a> and enter them so the plugin can function. | <a href=\"%1$s\">Hide Notice</a>"
+msgstr ""
+
+msgid "CAPTCHA should not be empty"
+msgstr ""
+
+msgid "CAPTCHA response was incorrect"
+msgstr ""
