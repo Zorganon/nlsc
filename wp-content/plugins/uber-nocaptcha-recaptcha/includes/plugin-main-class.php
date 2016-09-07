@@ -140,13 +140,13 @@ class ncr_base_class {
 		if ( ! wp_script_is( 'recaptcha', 'register' ) ) { // if a script with the same handle hasn't been already registered, register ours
 
 			if ( ! empty( $this->captcha_language ) ) {
-				wp_register_script( 'recaptchaAPI', 'http://www.google.com/recaptcha/api.js?render=explicit&hl=' . $this->captcha_language, null, '2.0', false );
+				wp_register_script( 'recaptchaAPI', '//www.google.com/recaptcha/api.js?render=explicit&hl=' . $this->captcha_language, null, '2.0', false );
 				wp_register_script( 'recaptchaGenerate', plugins_url( 'js/recaptcha.js', dirname( __FILE__ ) ), array(
 					'recaptchaAPI',
 					'jquery',
 				), '1.0', false );
 			} else {
-				wp_register_script( 'recaptchaAPI', 'http://www.google.com/recaptcha/api.js?render=explicit', null, '2.0', false );
+				wp_register_script( 'recaptchaAPI', '//www.google.com/recaptcha/api.js?render=explicit', null, '2.0', false );
 				wp_register_script( 'recaptchaGenerate', plugins_url( 'js/recaptcha.js', dirname( __FILE__ ) ), array(
 					'recaptchaAPI',
 					'jquery',
@@ -158,7 +158,7 @@ class ncr_base_class {
 			return new WP_Error( 'script_handle_exists', __( 'A script with the same has already been registered. Plugin conflict', 'uncr_translate' ) );
 		}
 
-		return false;
+
 	}
 
 	/**

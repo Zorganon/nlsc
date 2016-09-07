@@ -2,8 +2,8 @@
 Contributors: cristian.raiber
 Tags: comments, spam, recaptcha, login protection, comment protection, spam protection, nocaptcha, recaptcha, captcha
 Requires at least: 3.9
-Tested up to: 4.5.2
-Stable tag: 1.0.1
+Tested up to: 4.6
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,9 @@ This section describes how to install the plugin and get it working.
 1. Back-end UI
 
 == Changelog ==
+
+= 1.0.6 =
+* Made sure Uber Recaptcha works with https:// sites as well
 
 = 1.0.5 =
 * Re-worked the UI
