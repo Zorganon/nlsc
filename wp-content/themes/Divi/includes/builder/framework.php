@@ -21,6 +21,7 @@ if ( defined( 'DOING_AJAX' ) && DOING_AJAX && ! is_customize_preview() ) {
 		'et_fb_prepare_shortcode',
 		'et_fb_process_imported_content',
 		'et_fb_get_saved_templates',
+		'et_fb_retrieve_builder_data'
 	);
 
 	$force_builder_load = isset( $_POST['et_load_builder_modules'] ) && '1' === $_POST['et_load_builder_modules'];

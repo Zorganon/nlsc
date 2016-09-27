@@ -209,7 +209,7 @@ class ET_Builder_Module_Image extends ET_Builder_Module {
 			),
 			'max_width' => array(
 				'label'           => esc_html__( 'Image Max Width', 'et_builder' ),
-				'type'            => 'number',
+				'type'            => 'text',
 				'option_category' => 'layout',
 				'tab_slug'        => 'advanced',
 				'mobile_options'  => true,
@@ -7793,7 +7793,7 @@ class ET_Builder_Module_Portfolio extends ET_Builder_Module {
 
 			$query->posts_prev = array(
 				'label' => esc_html__( 'Next Entries &raquo;', 'et_builder' ),
-				'url' => previous_posts( false ),
+				'url' => ( $et_paged > 1 ) ? previous_posts( false ) : '',
 			);
 
 			// Added wp_pagenavi support
@@ -7929,13 +7929,44 @@ class ET_Builder_Module_Portfolio extends ET_Builder_Module {
 				<?php
 			}
 
-			if ( function_exists( 'wp_pagenavi' ) ) {
-				wp_pagenavi( array( 'query' => $portfolio ) );
-			} else {
-				if ( et_is_builder_plugin_active() ) {
-					include( ET_BUILDER_PLUGIN_DIR . 'includes/navigation.php' );
+			if ( 'on' === $show_pagination && ! is_search() ) {
+				if ( function_exists( 'wp_pagenavi' ) ) {
+					wp_pagenavi( array( 'query' => $portfolio ) );
 				} else {
-					get_template_part( 'includes/navigation', 'index' );
+					if ( et_is_builder_plugin_active() ) {
+						include( ET_BUILDER_PLUGIN_DIR . 'includes/navigation.php' );
+					} else {
+						$next_posts_link_html = $prev_posts_link_html = '';
+
+						if ( ! empty( $portfolio->posts_next['url'] ) ) {
+							$next_posts_link_html = sprintf(
+								'<div class="alignleft">
+									<a href="%1$s">%2$s</a>
+								</div>',
+								esc_url( $portfolio->posts_next['url'] ),
+								esc_html( $portfolio->posts_next['label'] )
+							);
+						}
+
+						if ( ! empty( $portfolio->posts_prev['url'] ) ) {
+							$prev_posts_link_html = sprintf(
+								'<div class="alignright">
+									<a href="%1$s">%2$s</a>
+								</div>',
+								esc_url( $portfolio->posts_prev['url'] ),
+								esc_html( $portfolio->posts_prev['label'] )
+							);
+						}
+
+						printf(
+							'<div class="pagination clearfix">
+								%1$s
+								%2$s
+							</div>',
+							$next_posts_link_html,
+							$prev_posts_link_html
+						);
+					}
 				}
 			}
 		} else {
@@ -10141,7 +10172,7 @@ class ET_Builder_Module_Contact_Form extends ET_Builder_Module {
 
 	function predefined_child_modules() {
 		$output = sprintf(
-			'[et_pb_contact_field field_title="%1$s" field_type="input" field_id="Name" required_mark="on" fullwidth_field="off" /][et_pb_contact_field field_title="%2$s" field_type="email" field_id="Email" required_mark="on" fullwidth_field="off" /][et_pb_contact_field field_title="%3$s" field_type="text" field_id="Message" required_mark="on" /]',
+			'[et_pb_contact_field field_title="%1$s" field_type="input" field_id="Name" required_mark="on" fullwidth_field="off" /][et_pb_contact_field field_title="%2$s" field_type="email" field_id="Email" required_mark="on" fullwidth_field="off" /][et_pb_contact_field field_title="%3$s" field_type="text" field_id="Message" required_mark="on" fullwidth_field="on" /]',
 			esc_attr__( 'Name', 'et_builder' ),
 			esc_attr__( 'Email Address', 'et_builder' ),
 			esc_attr__( 'Message', 'et_builder' )

@@ -1,3 +1,41 @@
+version 3.0.8 ( updated 09-23-2016 )
+- Fixed the issue that caused the Visual Builder to not load on static homepages in certain hosting environments. 
+- The Visual Builder will now load a bit faster. 
+- Added informational tooltips to all in-line editor icons in the Visual Builder.
+- Fixed JavaScript error that occurred when clicking the floating side navigation while inside the Visual Builder.
+- Fixed a bug that caused unused fonts to be enqueued on the front-end after using the In-line Editor.
+- Adjusted button module CSS priority to ensure button appearance is the same in the Visual Builder and the front-end. 
+- You can now type custom hex color values into the Visual Builder color picker.
+- Fixed a bug that caused the blog module to render incorrectly when adjust post count during Ajax load in the Visual Builder.
+- Added units and values to draggable padding indicators in the Visual Builder.
+- Holding [shift] while dragging section/row padding will now limit padding to 10px increments to make it easier to adjust to commonly-used values.
+- Holding [shift]+[alt] while dragging section/row padding will now drag the padding of the opposite side at the same rate, making it easy to achieve spacing conformity. 
+- Holding [alt] while dragging section/row padding will limit the padding value to less than or equal to the opposing padding value. 
+	* includes/builder/frontend-builder/app/assets/css/style.css
+	* includes/builder/frontend-builder/app/bundle.js
+	* includes/builder/class-et-builder-element.php
+	* includes/builder/framework.php
+	* includes/builder/helpers.php
+	* includes/builder/main-structure-elements.php
+	* includes/builder/functions.php
+
+version 3.0.7 ( updated 09-20-2016 )
+- Fixed padding and margin inconsistencies in the Visual Builder when compared to the front-end. 
+- Fixed bug that caused Portfolio pagination to display when turned off with the WP-PageNavi plugin enabled.
+- Fixed bug that caused the Max Width setting in Image Modules to not save correctly.
+- Modules will now be colored correctly in Visual Builder in all instances when used as a Split Testing subject or goal.
+- Prevented Visual Builder tooltips from overlaying the WordPress admin bar. 
+- Text within Fullwidth Header modules will now be vertically centered correctly in IE.
+- 4-Column rows will now break down correctly when toggling the responsive preview modes in the Visual Builder.
+- Fixed a JavaScript error that occurred when Split Tests were ended but failed to save correctly.
+- Fixed an issue with certain special characters being saved incorrectly in the Visual Builder.
+	* style.css
+	* includes/builder/frontend-builder/app/assets/css/style.css
+	* includes/builder/frontend-builder/app/bundle.js
+	* includes/builder/main-modules.php
+	* includes/builder/styles/frontend-builder-style.css
+	* includes/builder/scripts/frontend-builder-scripts.js
+
 version 3.0.6 ( updated 09-16-2016 )
 - Columns with equalized column heights will now appear correctly in the Visual Builder while responsive previews are active. 
 - Unpublished posts will no longer appear in post feeds while editing inside the Visual Builder.

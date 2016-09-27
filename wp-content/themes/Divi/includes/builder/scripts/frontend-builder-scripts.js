@@ -3164,13 +3164,13 @@
 						$et_pb_ab_goal.waypoint({
 							offset: '80%',
 							handler: function() {
-								if ( et_pb_ab_logged_status['read_goal'] || ! $et_pb_ab_goal.visible( true ) ) {
+								if ( et_pb_ab_logged_status['read_goal'] || ! $et_pb_ab_goal.length || ! $et_pb_ab_goal.visible( true ) ) {
 									return;
 								}
 
 								// log the goal_read if goal is still visible after 3 seconds.
 								setTimeout( function() {
-									if ( $et_pb_ab_goal.visible( true ) && ! et_pb_ab_logged_status['read_goal'] ) {
+									if ( $et_pb_ab_goal.length && $et_pb_ab_goal.visible( true ) && ! et_pb_ab_logged_status['read_goal'] ) {
 										et_pb_ab_update_stats( 'read_goal' );
 									}
 								}, 3000 );

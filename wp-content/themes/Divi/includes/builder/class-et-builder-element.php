@@ -3797,6 +3797,11 @@ class ET_Builder_Element {
 			$dependables = array();
 
 			foreach ( $_module->fields_unprocessed as $field_key => $field ) {
+				// do not add the fields with 'skip' type. These fields used for rendering shortcode on Front End only
+				if ( isset( $field['type'] ) && 'skip' === $field['type'] ) {
+					continue;
+				}
+
 				if ( isset( $field['affects'] ) ) {
 					$dependables[ $field_key ] = $field['affects'];
 				}

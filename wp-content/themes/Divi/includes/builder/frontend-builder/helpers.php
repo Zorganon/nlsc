@@ -73,30 +73,9 @@ function et_fb_backend_helpers() {
 	$post_type    = isset( $post->post_type ) ? $post->post_type : false;
 	$post_id      = isset( $post->ID ) ? $post->ID : false;
 	$post_status  = isset( $post->post_status ) ? $post->post_status : false;
-	$post_content = isset( $post->post_content ) ? $post->post_content : false;
 
 	if ( 'et_pb_layout' === $post_type ) {
 		$layout_type = et_fb_get_layout_type( $post_id );
-	}
-
-	switch ( $layout_type ) {
-		case 'module':
-			$use_fullwidth_section = false !== strpos( $post_content, '[et_pb_fullwidth_' ) ? true : false;
-
-			if ( ! $use_fullwidth_section ) {
-				$post_content = sprintf( '[et_pb_row][et_pb_column type="4_4"]%1$s[/et_pb_column][/et_pb_row]', $post_content );
-			}
-
-			$post_content = sprintf(
-				'[et_pb_section%2$s]%1$s[/et_pb_section]',
-				$post_content,
-				$use_fullwidth_section ? ' fullwidth="on"' : ''
-			);
-
-			break;
-		case 'row':
-			$post_content = '[et_pb_section]' . $post_content . '[/et_pb_section]';
-			break;
 	}
 
 	$google_fonts = array_merge( array( 'Default' => array() ), et_builder_get_google_fonts() );
@@ -119,14 +98,14 @@ function et_fb_backend_helpers() {
 		'postType'                     => $post_type,
 		'layoutType'                   => $layout_type,
 		'publishCapability'            => ( is_page() && ! current_user_can( 'publish_pages' ) ) || ( ! is_page() && ! current_user_can( 'publish_posts' ) ) ? 'no_publish' : 'publish',
-		'shortcodeObject'              => et_fb_process_shortcode( $post_content ),
+		'shortcodeObject'              => array(),
 		'ajaxUrl'                      => admin_url( 'admin-ajax.php' ),
 		'tinymceSkinUrl'               => ET_FB_ASSETS_URI . '/vendors/tinymce-skin',
 		'tinymceCSSFiles'              => esc_url( includes_url( 'js/tinymce' ) . '/skins/wordpress/wp-content.css' ),
 		'images_uri'                   => ET_BUILDER_URI .'/images',
-		'generalFields'                => ET_Builder_Element::get_general_fields( $post_type ),
-		'advancedFields'               => ET_Builder_Element::get_advanced_fields( $post_type ),
-		'customCssFields'              => ET_Builder_Element::get_custom_css_fields( $post_type ),
+		'generalFields'                => array(),
+		'advancedFields'               => array(),
+		'customCssFields'              => array(),
 		'moduleParentShortcodes'       => ET_Builder_Element::get_parent_shortcodes( $post_type ),
 		'moduleChildShortcodes'        => ET_Builder_Element::get_child_shortcodes( $post_type ),
 		'moduleChildSlugs'             => ET_Builder_Element::get_child_slugs( $post_type ),
@@ -515,6 +494,34 @@ function et_fb_backend_helpers() {
 				'undo'          => esc_html__( 'Undo', 'et_builder' ),
 				'cancel'        => esc_html__( 'Discard All Changes', 'et_builder' ),
 				'save'          => esc_html__( 'Save Changes', 'et_builder' ),
+			),
+			'inlineEditor' => array(
+				'back'             => esc_html__( 'Go Back', 'et_builder' ),
+				'increaseFontSize' => esc_html__( 'Decrease Font Size', 'et_builder' ),
+				'decreaseFontSize' => esc_html__( 'Increase Font Size', 'et_builder' ),
+				'bold'             => esc_html__( 'Bold Text', 'et_builder' ),
+				'italic'           => esc_html__( 'Italic Text', 'et_builder' ),
+				'underline'        => esc_html__( 'Underline Text', 'et_builder' ),
+				'link'             => esc_html__( 'Insert Link', 'et_builder' ),
+				'quote'            => esc_html__( 'Insert Quote', 'et_builder' ),
+				'alignment'        => esc_html__( 'Text Alignment', 'et_builder' ),
+				'centerText'       => esc_html__( 'Center Text', 'et_builder' ),
+				'rightText'        => esc_html__( 'Right Text', 'et_builder' ),
+				'leftText'         => esc_html__( 'Left Text', 'et_builder' ),
+				'justifyText'      => esc_html__( 'Justify Text', 'et_builder' ),
+				'list'             => esc_html__( 'List Settings', 'et_builder' ),
+				'indent'           => esc_html__( 'Indent List', 'et_builder' ),
+				'undent'           => esc_html__( 'Undent List', 'et_builder' ),
+				'orderedList'      => esc_html__( 'Insert Ordered List', 'et_builder' ),
+				'unOrderedList'    => esc_html__( 'Insert Unordered List', 'et_builder' ),
+				'text'             => esc_html__( 'Text Settings', 'et_builder' ),
+				'textColor'        => esc_html__( 'Text Color', 'et_builder' ),
+				'heading' => array(
+					'one'   => esc_html__( 'Insert Heading One', 'et_builder' ),
+					'two'   => esc_html__( 'Insert Heading Two', 'et_builder' ),
+					'three' => esc_html__( 'Insert Heading Three', 'et_builder' ),
+					'four'  => esc_html__( 'Insert Heading Four', 'et_builder' ),
+				),
 			),
 			'section' => array(
 				'tab' => array(
