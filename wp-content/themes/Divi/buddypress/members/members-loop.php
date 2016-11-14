@@ -53,7 +53,7 @@ do_action( 'bp_before_members_loop' ); ?>
 
 		<li <?php bp_member_class(); ?>>
 			<div class="item-avatar">
-				<a href="<?php bp_member_permalink(); ?>"><?php bp_member_avatar(); ?></a>
+				<a href="<?php bp_member_permalink(); ?>"><?php bp_member_avatar('type=full&width=180&height=180'); ?></a>
 			</div>
 
 			<div class="item">
@@ -84,6 +84,7 @@ do_action( 'bp_before_members_loop' ); ?>
 				  * bp_member_profile_data( 'field=the field name' );
 				  */
 				?>
+				<?php echo bp_member_profile_data('field=Location'); ?>
 			</div>
 
 			<div class="action">
