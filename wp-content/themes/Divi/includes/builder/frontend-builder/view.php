@@ -58,6 +58,13 @@ add_action( 'wp_footer', 'et_fb_wp_footer' );
 function et_fb_add_body_class( $classes ) {
 	$classes[] = 'et-fb';
 
+	foreach ( $classes as $key => $value ) {
+		if ( 'rtl' === $value ) {
+			unset( $classes[ $key ] );
+			break;
+		}
+	}
+
 	return $classes;
 }
 add_filter( 'body_class', 'et_fb_add_body_class' );

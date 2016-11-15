@@ -5,3 +5,34 @@
 [06-Jul-2016 01:44:30 UTC] PHP   3. include_once() /home/ubuntu/workspace/wp-admin/includes/plugin.php:552
 [06-Jul-2016 01:44:30 UTC] PHP   4. cdm_htaccess_protect_dir() /home/ubuntu/workspace/wp-content/plugins/sp-client-document-manager/cu.php:217
 [06-Jul-2016 01:44:30 UTC] PHP   5. file_put_contents() /home/ubuntu/workspace/wp-content/plugins/sp-client-document-manager/cu.php:207
+[15-Nov-2016 18:07:29 UTC] PHP Fatal error:  Cannot redeclare et_setup_theme() (previously declared in /home/ubuntu/workspace/wp-content/themes/Divi-child/functions.php:5) in /home/ubuntu/workspace/wp-content/themes/Divi/functions.php on line 5
+[15-Nov-2016 18:07:29 UTC] PHP Stack trace:
+[15-Nov-2016 18:07:29 UTC] PHP   1. {main}() /home/ubuntu/workspace/wp-admin/admin-ajax.php:0
+[15-Nov-2016 18:07:29 UTC] PHP   2. require_once() /home/ubuntu/workspace/wp-admin/admin-ajax.php:22
+[15-Nov-2016 18:07:29 UTC] PHP   3. require_once() /home/ubuntu/workspace/wp-load.php:39
+[15-Nov-2016 18:07:29 UTC] PHP   4. require_once() /home/ubuntu/workspace/wp-config.php:92
+[15-Nov-2016 18:07:45 UTC] PHP Fatal error:  Cannot redeclare et_setup_theme() (previously declared in /home/ubuntu/workspace/wp-content/themes/Divi-child/functions.php:5) in /home/ubuntu/workspace/wp-content/themes/Divi/functions.php on line 5
+[15-Nov-2016 18:07:45 UTC] PHP Stack trace:
+[15-Nov-2016 18:07:45 UTC] PHP   1. {main}() /home/ubuntu/workspace/wp-admin/admin-ajax.php:0
+[15-Nov-2016 18:07:45 UTC] PHP   2. require_once() /home/ubuntu/workspace/wp-admin/admin-ajax.php:22
+[15-Nov-2016 18:07:45 UTC] PHP   3. require_once() /home/ubuntu/workspace/wp-load.php:39
+[15-Nov-2016 18:07:45 UTC] PHP   4. require_once() /home/ubuntu/workspace/wp-config.php:92
+[15-Nov-2016 18:08:07 UTC] PHP Fatal error:  Cannot redeclare et_setup_theme() (previously declared in /home/ubuntu/workspace/wp-content/themes/Divi-child/functions.php:5) in /home/ubuntu/workspace/wp-content/themes/Divi/functions.php on line 5
+[15-Nov-2016 18:08:07 UTC] PHP Stack trace:
+[15-Nov-2016 18:08:07 UTC] PHP   1. {main}() /home/ubuntu/workspace/wp-admin/admin-ajax.php:0
+[15-Nov-2016 18:08:07 UTC] PHP   2. require_once() /home/ubuntu/workspace/wp-admin/admin-ajax.php:22
+[15-Nov-2016 18:08:07 UTC] PHP   3. require_once() /home/ubuntu/workspace/wp-load.php:39
+[15-Nov-2016 18:08:07 UTC] PHP   4. require_once() /home/ubuntu/workspace/wp-config.php:92
+[15-Nov-2016 18:08:15 UTC] PHP Fatal error:  Cannot redeclare et_setup_theme() (previously declared in /home/ubuntu/workspace/wp-content/themes/Divi-child/functions.php:5) in /home/ubuntu/workspace/wp-content/themes/Divi/functions.php on line 5
+[15-Nov-2016 18:08:15 UTC] PHP Stack trace:
+[15-Nov-2016 18:08:15 UTC] PHP   1. {main}() /home/ubuntu/workspace/wp-admin/post.php:0
+[15-Nov-2016 18:08:15 UTC] PHP   2. require_once() /home/ubuntu/workspace/wp-admin/post.php:12
+[15-Nov-2016 18:08:15 UTC] PHP   3. require_once() /home/ubuntu/workspace/wp-admin/admin.php:31
+[15-Nov-2016 18:08:15 UTC] PHP   4. require_once() /home/ubuntu/workspace/wp-load.php:39
+[15-Nov-2016 18:08:15 UTC] PHP   5. require_once() /home/ubuntu/workspace/wp-config.php:92
+[15-Nov-2016 18:08:16 UTC] PHP Fatal error:  Cannot redeclare et_setup_theme() (previously declared in /home/ubuntu/workspace/wp-content/themes/Divi-child/functions.php:5) in /home/ubuntu/workspace/wp-content/themes/Divi/functions.php on line 5
+[15-Nov-2016 18:08:16 UTC] PHP Stack trace:
+[15-Nov-2016 18:08:16 UTC] PHP   1. {main}() /home/ubuntu/workspace/wp-admin/admin-ajax.php:0
+[15-Nov-2016 18:08:16 UTC] PHP   2. require_once() /home/ubuntu/workspace/wp-admin/admin-ajax.php:22
+[15-Nov-2016 18:08:16 UTC] PHP   3. require_once() /home/ubuntu/workspace/wp-load.php:39
+[15-Nov-2016 18:08:16 UTC] PHP   4. require_once() /home/ubuntu/workspace/wp-config.php:92

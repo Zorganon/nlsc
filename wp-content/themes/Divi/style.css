@@ -1,7 +1,7 @@
 /*
 Theme Name: Divi
 Theme URI: http://www.elegantthemes.com/gallery/divi/
-Version: 3.0.8
+Version: 3.0.18
 Description: Smart. Flexible. Beautiful. Divi is the most powerful theme in our collection.
 Author: Elegant Themes
 Author URI: http://www.elegantthemes.com
@@ -9,7 +9,6 @@ Tags: responsive-layout, one-column, two-columns, three-columns, four-columns, l
 License: GNU General Public License v2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
-
 /* Browser Reset */
 html,
 body,
@@ -6075,28 +6074,6 @@ ul.et_pb_side_nav .side_nav_item a.active {
 	box-sizing: border-box;
 }
 
-#wp-admin-bar-et-use-visual-builder a:before {
-	width: 28px;
-	margin-top: -3px;
-	color: #974df3 !important;
-	font-family: "ETmodules" !important;
-	font-size: 30px !important;
-	content: "\e625";
-}
-
-#wp-admin-bar-et-use-visual-builder:hover a:before {
-	color: #fff !important;
-}
-
-#wp-admin-bar-et-use-visual-builder a:hover,
-#wp-admin-bar-et-use-visual-builder:hover a {
-	color: #fff !important;
-	background-color: #7e3bd0 !important;
-	-webkit-transition: background-color 0.5s ease;
-	-moz-transition: background-color 0.5s ease;
-	transition: background-color 0.5s ease;
-}
-
 /* Headers */
 .et_pb_column_1_3 h1,
 .et_pb_column_1_4 h1 {
@@ -6253,6 +6230,10 @@ ul.et_pb_side_nav .side_nav_item a.active {
 	-webkit-transition: all 0.2s;
 	-moz-transition: all 0.2s;
 	transition: all 0.2s;
+}
+
+.et_pb_button:before {
+	display: none;
 }
 
 .et_pb_button:hover:after,
@@ -6859,6 +6840,15 @@ p.et_pb_gallery_caption {
 	position: relative;
 }
 
+/* Blog Module Inner Modules */
+.et_pb_posts.et_pb_module article .et_pb_row {
+	width: 100%;
+}
+
+.et_pb_posts.et_pb_module article .et_pb_with_background .et_pb_row {
+	width: 80%;
+}
+
 /* Color Layouts */
 .et_pb_bg_layout_light .et_pb_post .post-meta,
 .et_pb_bg_layout_light .et_pb_portfolio_item .post-meta,
@@ -6960,6 +6950,23 @@ p.et_pb_gallery_caption {
 	-moz-animation: gridFadeIn 1s 1 cubic-bezier(0.77, 0, 0.175, 1);
 	-o-animation: gridFadeIn 1s 1 cubic-bezier(0.77, 0, 0.175, 1);
 	animation: gridFadeIn 1s 1 cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* Video Format Overlay */
+.et_pb_post .et_main_video_container {
+	position: relative;
+}
+
+.et_pb_post .et_pb_video_overlay .et_pb_video_play {
+	color: #fff;
+}
+
+.et_pb_post .et_pb_video_overlay_hover:hover {
+	background: rgba(0, 0, 0, 0.6);
+}
+
+.et_pb_blog_grid .et_main_video_overlay:hover:before {
+	background: rgba(0, 0, 0, 0.6);
 }
 
 /* Video Module */
@@ -7596,7 +7603,7 @@ body.chrome.parallax-map-support .et_pb_map {
 	margin-left: -3%;
 }
 
-.et_pb_contact_field {
+p.et_pb_contact_field {
 	margin-bottom: 3%;
 	padding: 0 0 0 3%;
 }
@@ -7929,6 +7936,10 @@ body.chrome.parallax-map-support .et_pb_map {
 }
 
 /* Fullwidth Menu Module */
+.et_pb_fullwidth_menu {
+	position: relative;
+}
+
 .et_pb_fullwidth_menu .fullwidth-menu-nav,
 .et_pb_fullwidth_menu .fullwidth-menu-nav > ul {
 	float: none;
@@ -10739,6 +10750,19 @@ article.et_pb_has_overlay {
 	margin-bottom: 25% !important;
 }
 
+/* Post Slider Inner Modules */
+.et_pb_post_slider.et_pb_module .et_pb_row {
+	width: 100%;
+}
+
+.et_pb_post_slider.et_pb_module .et_pb_with_background .et_pb_row {
+	width: 80%;
+}
+
+.et_pb_post_slider.et_pb_module .et_pb_section {
+	background-color: transparent;
+}
+
 /* Search Module */
 .et_pb_search .screen-reader-text {
 	display: none;
@@ -12046,11 +12070,11 @@ span.comment_date {
 		position: absolute;
 	}
 
-	.et_pb_blog_grid .mejs-container {
+	.et_pb_blog_grid .mejs-container.wp-audio-shortcode {
 		height: 80px !important;
 	}
 
-	.et_pb_blog_grid .mejs-controls {
+	.et_pb_blog_grid .mejs-audio .mejs-controls {
 		height: 100% !important;
 	}
 
@@ -15670,4 +15694,25 @@ span.comment_date {
 	.et_pb_section .et_pb_column .et_pb_post_slider_image_bottom .et_pb_slide_video {
 		margin-bottom: 16% !important;
 	}
+}
+
+/* These "global" styles need to be seperate so they don't get wrapped in divi-builder file /less/frontend-builder-plugin-style.less */
+#wp-admin-bar-et-use-visual-builder a:before {
+	width: 28px;
+	margin-top: -3px;
+	color: #974df3 !important;
+	font-family: "ETmodules" !important;
+	font-size: 30px !important;
+	content: "\e625";
+}
+#wp-admin-bar-et-use-visual-builder:hover a:before {
+	color: #fff !important;
+}
+#wp-admin-bar-et-use-visual-builder a:hover,
+#wp-admin-bar-et-use-visual-builder:hover a {
+	color: #fff !important;
+	background-color: #7e3bd0 !important;
+	-webkit-transition: background-color 0.5s ease;
+	-moz-transition: background-color 0.5s ease;
+	transition: background-color 0.5s ease;
 }

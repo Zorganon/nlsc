@@ -1423,28 +1423,62 @@ function et_builder_get_failure_notification_modal() {
 	}
 
 	$output = sprintf(
-		'<div class="et_pb_modal_overlay et_modal_on_top et_pb_failure_notification_modal et_pb_new_template_modal">
-			<div class="et_pb_prompt_modal">
-				<h2>%1$s</h2>
+		'<div class="et-core-modal-overlay et-builder-timeout et-core-active">
+			<div class="et-core-modal">
+				<div class="et-core-modal-header">
+					<h3 class="et-core-modal-title">%1$s</h3>
+					<a href="#" class="et-core-modal-close" data-et-core-modal="close"></a>
+				</div>
 
-				<div class="et_pb_prompt_modal_inside">
-					<p><strong>Oops, it looks like the Divi Builder failed to load. Performing the following actions may help solve the problem.</strong></p>
+				<div class="et-core-modal-content">
+					<p><strong>%4$s</strong></p>
 
 					%2$s
 				</div>
 
-				<a href="#"" class="et_pb_prompt_dont_proceed et-pb-modal-close"></a>
-
 				<div class="et_pb_prompt_buttons">
 					<br>
 					<span class="spinner"></span>
-					<a href="#" class="et_pb_reload_builder button-primary et_pb_prompt_proceed">%3$s</a>
+					<a href="#" class="et-core-modal-action">%3$s</a>
 				</div>
 			</div>
 		</div>',
 		esc_html__( 'Divi Builder Timeout', 'et_builder' ),
 		$messages,
-		esc_html__( 'Reload The Builder', 'et_builder' )
+		esc_html__( 'Reload The Builder', 'et_builder' ),
+		esc_html__( 'Oops, it looks like the Divi Builder failed to load. Performing the following actions may help solve the problem.', 'et_builder' )
+	);
+
+	return $output;
+}
+endif;
+
+if ( ! function_exists( 'et_builder_get_exit_notification_modal' ) ) :
+function et_builder_get_exit_notification_modal() {
+	$output = sprintf(
+		'<div class="et-core-modal-overlay et-core-modal-two-buttons et-builder-exit-modal et-core-active">
+			<div class="et-core-modal">
+				<div class="et-core-modal-header">
+					<h3 class="et-core-modal-title">%1$s</h3>
+					<a href="#" class="et-core-modal-close" data-et-core-modal="close"></a>
+				</div>
+
+				<div class="et-core-modal-content">
+					<p>%2$s</p>
+				</div>
+
+				<div class="et_pb_prompt_buttons">
+					<br>
+					<span class="spinner"></span>
+					<a href="#" class="et-core-modal-action et-core-modal-action-secondary">%3$s</a>
+					<a href="#" class="et-core-modal-action">%4$s</a>
+				</div>
+			</div>
+		</div>',
+		esc_html__( 'You Have Unsaved Changes', 'et_builder' ),
+		et_get_safe_localization( __( 'Your page contains changes that have not been saved. If you close the builder without saving, these changes will be lost. If you would like to leave the builder and save all changes, please select <strong>Save & Exit</strong>. If you would like to discard all recent changes, choose <strong>Discard & Exit</strong>.', 'et_builder' ) ),
+		esc_html__( 'Discard & Exit', 'et_builder' ),
+		esc_html__( 'Save & Exit', 'et_builder' )
 	);
 
 	return $output;
@@ -2069,6 +2103,24 @@ function et_fb_is_enabled( $post_id = false ) {
 	}
 
 	return true;
+}
+endif;
+
+if ( ! function_exists( 'et_fb_is_retrieving_builder_data' ) ) :
+function et_fb_is_retrieving_builder_data() {
+	if ( ! isset( $_POST['et_fb_helper_nonce'] ) || ! wp_verify_nonce( $_POST['et_fb_helper_nonce'], 'et_fb_backend_helper_nonce' ) ) {
+		return false;
+	}
+
+	if ( ! current_user_can( 'edit_posts' ) ) {
+		return false;
+	}
+
+	if ( isset( $_POST['action'] ) && 'et_fb_retrieve_builder_data' === $_POST['action'] ) {
+		return true;
+	}
+
+	return false;
 }
 endif;
 

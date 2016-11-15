@@ -236,4 +236,16 @@ function et_pb_get_google_api_key() {
 }
 endif;
 
+if ( ! function_exists( 'et_pb_enqueue_google_maps_script' ) ) :
+function et_pb_enqueue_google_maps_script() {
+	$google_api_option = get_option( 'et_google_api_settings' );
+	$google_maps_script_enqueue = !$google_api_option || !isset( $google_api_option['enqueue_google_maps_script'] ) || (isset( $google_api_option['enqueue_google_maps_script'] ) && 'on' === $google_api_option['enqueue_google_maps_script']) ? true : false;
+
+	return apply_filters(
+		'et_pb_enqueue_google_maps_script',
+		$google_maps_script_enqueue
+	);
+}
+endif;
+
 et_builder_load_framework();

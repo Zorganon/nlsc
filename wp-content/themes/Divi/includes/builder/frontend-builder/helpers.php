@@ -36,7 +36,7 @@ function et_fb_get_layout_type( $post_id ) {
 }
 
 function et_fb_comments_template() {
-	return dirname(__FILE__) . '/comments_template.php';
+	return ET_BUILDER_DIR . 'comments_template.php';
 }
 
 function et_fb_modify_comments_request( $params ) {
@@ -63,6 +63,18 @@ function et_fb_get_comments_markup() {
 	remove_action( 'pre_get_comments', 'et_fb_modify_comments_request', 1 );
 
 	return $comments_content;
+}
+
+// List of shortcode wrappers that requires adjustment in VB. Plugins which uses fullscreen dimension
+// tend to apply negative positioning which looks inappropriate on VB's shortcode mechanism
+function et_fb_known_shortcode_wrappers() {
+	return apply_filters( 'et_fb_known_shortcode_wrappers', array(
+		'removeLeft' => array(
+			'.fullscreen-container', // revolution slider,
+			'.esg-container-fullscreen-forcer', // essential grid
+			'.ls-wp-fullwidth-helper', // layer slider
+		),
+	) );
 }
 
 function et_fb_backend_helpers() {
@@ -119,6 +131,7 @@ function et_fb_backend_helpers() {
 		'shortcode_tags'               => et_fb_shortcode_tags(),
 		'getFontIconSymbols'           => et_pb_get_font_icon_symbols(),
 		'failureNotification'          => et_builder_get_failure_notification_modal(),
+		'exitNotification'             => et_builder_get_exit_notification_modal(),
 		'getTaxonomies'                => apply_filters( 'et_fb_taxonomies', array(
 			'category'                 => get_categories(),
 			'project_category'         => get_categories( array( 'taxonomy' => 'project_category' ) ),
@@ -163,6 +176,7 @@ function et_fb_backend_helpers() {
 		),
 		'conditionalTags'              => et_fb_conditional_tag_params(),
 		'currentPage'                  => et_fb_current_page_params(),
+		'appPreferences'               => et_fb_app_preferences(),
 		'classNames'                   => array(
 			'hide_on_mobile_class'     => 'et-hide-mobile',
 		),
@@ -267,6 +281,7 @@ function et_fb_backend_helpers() {
 
 			),
 		),
+		'knownShortcodeWrappers'           => et_fb_known_shortcode_wrappers(),
 	);
 
 	// Internationalization.
@@ -369,6 +384,8 @@ function et_fb_backend_helpers() {
 			'unlock'          => esc_html__( 'Unlock', 'et_builder' ),
 			'copy'            => esc_html__( 'Copy', 'et_builder' ),
 			'paste'           => esc_html__( 'Paste', 'et_builder' ),
+			'copyStyle'       => esc_html__( 'Copy Style', 'et_builder' ),
+			'pasteStyle'      => esc_html__( 'Paste Style', 'et_builder' ),
 			'disable'         => esc_html__( 'Disable', 'et_builder' ),
 			'enable'          => esc_html__( 'Enable', 'et_builder' ),
 			'save'            => esc_html__( 'Save to Library', 'et_builder' ),
@@ -450,6 +467,15 @@ function et_fb_backend_helpers() {
 			),
 			'meta' => et_pb_history_localization(),
 		),
+		'help' => array(
+			'modal' => array(
+				'title' => esc_html__( 'Divi Builder Helper', 'et_builder' ),
+				'tabs' => array(
+					'shortcut' => esc_html__( 'Shortcuts', 'et_builder' ),
+				),
+			),
+			'shortcuts' => et_builder_get_shortcuts('fb'),
+		),
 		'sortable' => array(
 			'has_no_ab_permission'                     => esc_html__( 'You do not have permission to edit the module, row or section in this split test.', 'et_builder' ),
 			'cannot_move_goal_into_subject'            => esc_html__( 'A split testing goal cannot be moved inside of a split testing subject. To perform this action you must first end your split test.', 'et_builder' ),
@@ -489,7 +515,7 @@ function et_fb_backend_helpers() {
 				'contractModal' => esc_html__( 'Contract Modal', 'et_builder' ),
 				'resize'        => esc_html__( 'Resize Modal', 'et_builder' ),
 				'snapModal'     => esc_html__( 'Snap to Left', 'et_builder' ),
-				'separateModal' => esc_html__( 'Seperate Modal', 'et_builder' ),
+				'separateModal' => esc_html__( 'Separate Modal', 'et_builder' ),
 				'redo'          => esc_html__( 'Redo', 'et_builder' ),
 				'undo'          => esc_html__( 'Undo', 'et_builder' ),
 				'cancel'        => esc_html__( 'Discard All Changes', 'et_builder' ),

@@ -175,7 +175,7 @@ function et_browser_body_class($classes) {
 /*this function allows for the auto-creation of post excerpts*/
 if ( ! function_exists( 'truncate_post' ) ) {
 
-	function truncate_post( $amount, $echo = true, $post = '' ) {
+	function truncate_post( $amount, $echo = true, $post = '', $strip_shortcodes = false ) {
 		global $shortname;
 
 		if ( '' == $post ) global $post;
@@ -200,8 +200,12 @@ if ( ! function_exists( 'truncate_post' ) ) {
 			// due to unparsed audio shortcode
 			$truncate = preg_replace( '@\[audio[^\]]*?\].*?\[\/audio]@si', '', $truncate );
 
-			// apply content filters
-			$truncate = apply_filters( 'the_content', $truncate );
+			if ( $strip_shortcodes ) {
+				$truncate = et_strip_shortcodes( $truncate );
+			} else {
+				// apply content filters
+				$truncate = apply_filters( 'the_content', $truncate );
+			}
 
 			// decide if we need to append dots at the end of the string
 			if ( strlen( $truncate ) <= $amount ) {
@@ -287,7 +291,10 @@ if ( ! function_exists( 'et_first_image' ) ) {
 	function et_first_image() {
 		global $post;
 		$img = '';
-		$output = preg_match_all( '/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $post->post_content, $matches );
+		// apply the_content filter to execute all shortcodes and get the correct image from the processed content
+		$processed_content = apply_filters( 'the_content', $post->post_content );
+
+		$output = preg_match_all( '/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $processed_content, $matches );
 		if ( isset( $matches[1][0] ) ) $img = $matches[1][0];
 
 		return trim( $img );

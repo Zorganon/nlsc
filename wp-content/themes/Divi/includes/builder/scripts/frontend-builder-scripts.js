@@ -450,6 +450,9 @@
 						} );
 					}
 
+					// reinit parallax on slide change to make sure it displayed correctly
+					window.et_pb_parallax_init( $next_slide );
+
 					et_slider_auto_rotate();
 				}
 		}
@@ -2371,6 +2374,10 @@
 				}
 
 				window.et_pb_map_init = function( $this_map_container ) {
+					if (typeof google === 'undefined') {
+						return;
+					}
+
 					var $this_map = $this_map_container.children('.et_pb_map'),
 						this_map_grayscale = $this_map_container.attr( 'data-grayscale' ) || 0,
 						is_draggable = ( et_is_mobile_device && $this_map.data('mobile-dragging') !== 'off' ) || ! et_is_mobile_device,
@@ -2435,9 +2442,11 @@
 				if ( window.et_load_event_fired ) {
 					et_pb_init_maps();
 				} else {
-					google.maps.event.addDomListener(window, 'load', function() {
-						et_pb_init_maps();
-					} );
+					if ( typeof google !== 'undefined' ) {
+						google.maps.event.addDomListener(window, 'load', function() {
+							et_pb_init_maps();
+						} );
+					}
 				}
 			}
 
@@ -2566,6 +2575,18 @@
 				$this.find('.et_parallax_bg').css( { 'height' : bg_height } );
 			}
 
+			function et_toggle_animation_callback( initial_toggle_state, $module, $section ) {
+				if ( 'closed' === initial_toggle_state ) {
+					$module.removeClass('et_pb_toggle_close').addClass('et_pb_toggle_open');
+				} else {
+					$module.removeClass('et_pb_toggle_open').addClass('et_pb_toggle_close');
+				}
+
+				if ( $section.hasClass( 'et_pb_section_parallax' ) && !$section.children().hasClass( 'et_pb_parallax_css') ) {
+					$.proxy( et_parallax_set_height, $section )();
+				}
+			}
+
 			$( '.et_pb_section' ).on( 'click', '.et_pb_toggle_title', function() {
 				var $this_heading         = $(this),
 					$module               = $this_heading.closest('.et_pb_toggle'),
@@ -2593,17 +2614,15 @@
 					return;
 				}
 
-				$content.slideToggle( 700, function() {
-					if ( 'closed' === initial_toggle_state ) {
-						$module.removeClass('et_pb_toggle_close').addClass('et_pb_toggle_open');
-					} else {
-						$module.removeClass('et_pb_toggle_open').addClass('et_pb_toggle_close');
-					}
-
-					if ( $section.hasClass( 'et_pb_section_parallax' ) && !$section.children().hasClass( 'et_pb_parallax_css') ) {
-						$.proxy( et_parallax_set_height, $section )();
-					}
-				} );
+				if ( $('body').hasClass('safari') ) {
+					$content.fadeToggle( 700, function() {
+						et_toggle_animation_callback( initial_toggle_state, $module, $section );
+					} );
+				} else {
+					$content.slideToggle( 700, function() {
+						et_toggle_animation_callback( initial_toggle_state, $module, $section );
+					} );
+				}
 
 				if ( is_accordion ) {
 					$accordion_active_toggle.find('.et_pb_toggle_content').slideToggle( 700, function() {
@@ -2791,7 +2810,36 @@
 
 			window.et_pb_play_overlayed_video = function( $play_video ) {
 				var $this        = $play_video,
-					$video_image = $this.closest( '.et_pb_video_overlay' );
+					$video_image = $this.closest('.et_pb_video_overlay'),
+					$wrapper     = $this.closest('.et_pb_video, .et_main_video_container'),
+					$video_iframe = $wrapper.find('iframe'),
+					is_embedded = $video_iframe.length ? true : false,
+					video_iframe_src,
+					video_iframe_src_splitted,
+					video_iframe_src_autoplay;
+
+				if (is_embedded) {
+					// Add autoplay parameter to automatically play embedded content when overlay is clicked
+					video_iframe_src = $video_iframe.attr('src');
+					video_iframe_src_splitted = video_iframe_src.split("?");
+
+					if (video_iframe_src.indexOf('autoplay=') !== -1) {
+						return;
+					}
+
+					if (typeof video_iframe_src_splitted[1] !== 'undefined') {
+						video_iframe_src_autoplay = video_iframe_src_splitted[0] + "?autoplay=1&amp;" + video_iframe_src_splitted[1];
+					} else {
+						video_iframe_src_autoplay = video_iframe_src_splitted[0] + "?autoplay=1";
+					}
+
+					$video_iframe.attr({
+						'src': video_iframe_src_autoplay
+					});
+				} else {
+					$wrapper.find('video').get(0).play();
+				}
+
 
 				$video_image.fadeTo( 500, 0, function() {
 					var $image = $(this);
@@ -2800,7 +2848,7 @@
 				} );
 			}
 
-			$( '.et_pb_video .et_pb_video_overlay, .et_pb_video_wrap .et_pb_video_overlay' ).click( function() {
+			$( '.et_pb_post .et_pb_video_overlay, .et_pb_video .et_pb_video_overlay, .et_pb_video_wrap .et_pb_video_overlay' ).click( function() {
 				var $this = $(this);
 
 				et_pb_play_overlayed_video( $this );
