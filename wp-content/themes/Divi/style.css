@@ -10,21 +10,6 @@ License: GNU General Public License v2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
-/* NLSC CUSTOM ADDED STYLES */
-
-#members-dir-list img.avatar {
-	-webkit-border-radius: 50%;
-	-moz-border-radius: 50%;
-	-ms-border-radius: 50%;
-	-o-border-radius: 50%;
-	border-radius: 50%;
-	-webkit-box-shadow: 0 1px 0 #fff;
-	-moz-box-shadow: 0 1px 0 #fff;
-	box-shadow: 0 1px 0 #fff;
-}
-
-/* END NLSC CUSTOM ADDED STYLES */
-
 /* Browser Reset */
 html,
 body,

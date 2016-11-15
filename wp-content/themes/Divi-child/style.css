@@ -1,0 +1,47 @@
+/*
+Theme Name: Divi Child Theme
+Theme URI: http://www.elegantthemes.com/gallery/divi/
+Description: Child Theme to house NLSC customizations for the Divi theme.
+Author: Elegant Themes
+Author URI: http://www.elegantthemes.com
+Template: Divi
+Version: 1.0.0
+
+*/
+@import url("../Divi/style.css");
+
+/* custom styles begin below this line */
+
+
+/*member list style changes  */
+	/*this style rounds the member pictures in the members list*/
+	#members-dir-list img.avatar {
+		-webkit-border-radius: 50%;
+		-moz-border-radius: 50%;
+		-ms-border-radius: 50%;
+		-o-border-radius: 50%;
+		border-radius: 50%;
+		-webkit-box-shadow: 0 1px 0 #fff;
+		-moz-box-shadow: 0 1px 0 #fff;
+		box-shadow: 0 1px 0 #fff;
+	}
+	
+	/*this style adds a hover effect to the member pictures in the members list*/
+	#members-dir-list a:hover img.avatar {
+		-webkit-filter: grayscale(100%);
+		-moz-filter: grayscale(100%);
+		filter: grayscale(100%);
+		-webkit-transition: -webkit-filter 0.2s ease-in-out;
+		-moz-transition: -moz-filter 0.2s ease-in-out;
+		transition: filter 0.2s ease-in-out;
+	}
+	
+	/* this style changes member list layout from a list, to a grid */
+	#buddypress #members-list li {
+		overflow: auto;
+		list-style: none;
+		float: left;
+		width: 30%;
+		margin: 0 20px 28px 0;
+		border: 0;
+	}

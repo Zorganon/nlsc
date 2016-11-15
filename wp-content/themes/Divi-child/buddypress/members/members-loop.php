@@ -1,6 +1,10 @@
-//This was originally a copy of wp-content/plugins/buddypress/bp-templates/members/members-loop.php --- it has been modified
+
 <?php
 /**
+ * 
+ * This was originally a copy of wp-content/plugins/buddypress/bp-templates/members/members-loop.php --- it has been modified
+ * 
+ * 
  * BuddyPress - Members Loop
  *
  * Querystring is set via AJAX in _inc/ajax.php - bp_legacy_theme_object_filter()
