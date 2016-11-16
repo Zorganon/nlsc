@@ -36,3 +36,21 @@
 [15-Nov-2016 18:08:16 UTC] PHP   2. require_once() /home/ubuntu/workspace/wp-admin/admin-ajax.php:22
 [15-Nov-2016 18:08:16 UTC] PHP   3. require_once() /home/ubuntu/workspace/wp-load.php:39
 [15-Nov-2016 18:08:16 UTC] PHP   4. require_once() /home/ubuntu/workspace/wp-config.php:92
+[16-Nov-2016 19:49:23 UTC] WordPress database error Table 'c9.wp_m_membership_relationships' doesn't exist for query SELECT count(*) FROM wp_m_membership_relationships WHERE sub_id != 0 AND expirydate <= '2016-11-16 19:49:23' ORDER BY expirydate ASC made by activate_plugin, include_once('/plugins/membership/membership.php'), membership2_init_old_app, require_once('/plugins/membership/app_old/membership.php'), require_once('/plugins/membership/app_old/membershipincludes/classes/membershipcron.php'), membershipcron->__construct, membershipcron->get_expiring_relationships_count
+[16-Nov-2016 19:49:23 UTC] WordPress database error Table 'c9.wp_m_membership_relationships' doesn't exist for query SELECT count(*) FROM wp_m_membership_relationships WHERE sub_id != 0 AND expirydate <= '2016-11-16 19:49:23' ORDER BY expirydate ASC made by require_once('wp-admin/admin.php'), require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), include_once('/plugins/membership/membership.php'), membership2_init_old_app, require_once('/plugins/membership/app_old/membership.php'), require_once('/plugins/membership/app_old/membershipincludes/classes/membershipcron.php'), membershipcron->__construct, membershipcron->get_expiring_relationships_count
+[16-Nov-2016 20:31:53 UTC] PHP Warning:  call_user_func_array() expects parameter 1 to be a valid callback, class 'c_ws_plugin__s2member_utils_logs' not found in /home/ubuntu/workspace/wp-includes/plugin.php on line 524
+[16-Nov-2016 20:31:53 UTC] PHP Stack trace:
+[16-Nov-2016 20:31:53 UTC] PHP   1. {main}() /home/ubuntu/workspace/wp-admin/admin-ajax.php:0
+[16-Nov-2016 20:31:53 UTC] PHP   2. do_action() /home/ubuntu/workspace/wp-admin/admin-ajax.php:91
+[16-Nov-2016 20:31:53 UTC] PHP   3. call_user_func_array:{/home/ubuntu/workspace/wp-includes/plugin.php:524}() /home/ubuntu/workspace/wp-includes/plugin.php:524
+[16-Nov-2016 20:31:53 UTC] PHP   4. wp_ajax_delete_plugin() /home/ubuntu/workspace/wp-includes/plugin.php:524
+[16-Nov-2016 20:31:53 UTC] PHP   5. delete_plugins() /home/ubuntu/workspace/wp-admin/includes/ajax-actions.php:3821
+[16-Nov-2016 20:31:53 UTC] PHP   6. set_site_transient() /home/ubuntu/workspace/wp-admin/includes/plugin.php:893
+[16-Nov-2016 20:31:53 UTC] PHP   7. apply_filters() /home/ubuntu/workspace/wp-includes/option.php:1628
+[16-Nov-2016 20:31:53 UTC] PHP   8. call_user_func_array:{/home/ubuntu/workspace/wp-includes/plugin.php:235}() /home/ubuntu/workspace/wp-includes/plugin.php:235
+[16-Nov-2016 20:31:53 UTC] PHP   9. ET_Core_Updates->check_plugins_updates() /home/ubuntu/workspace/wp-includes/plugin.php:235
+[16-Nov-2016 20:31:53 UTC] PHP  10. wp_remote_post() /home/ubuntu/workspace/wp-content/themes/Divi/core/admin/includes/class-updates.php:226
+[16-Nov-2016 20:31:53 UTC] PHP  11. WP_Http->post() /home/ubuntu/workspace/wp-includes/http.php:187
+[16-Nov-2016 20:31:53 UTC] PHP  12. WP_Http->request() /home/ubuntu/workspace/wp-includes/class-http.php:576
+[16-Nov-2016 20:31:53 UTC] PHP  13. do_action() /home/ubuntu/workspace/wp-includes/class-http.php:393
+[16-Nov-2016 20:31:53 UTC] PHP  14. call_user_func_array:{/home/ubuntu/workspace/wp-includes/plugin.php:524}() /home/ubuntu/workspace/wp-includes/plugin.php:524
