@@ -88,7 +88,7 @@ do_action( 'bp_before_members_loop' ); ?>
 				  * bp_member_profile_data( 'field=the field name' );
 				  */
 				?>
-				<?php echo bp_member_profile_data('field=Location'); ?>
+				<?php echo bp_member_profile_data('field=City, State'); ?>
 			</div>
 
 			<div class="action">

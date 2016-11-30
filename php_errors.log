@@ -54,3 +54,11 @@
 [16-Nov-2016 20:31:53 UTC] PHP  12. WP_Http->request() /home/ubuntu/workspace/wp-includes/class-http.php:576
 [16-Nov-2016 20:31:53 UTC] PHP  13. do_action() /home/ubuntu/workspace/wp-includes/class-http.php:393
 [16-Nov-2016 20:31:53 UTC] PHP  14. call_user_func_array:{/home/ubuntu/workspace/wp-includes/plugin.php:524}() /home/ubuntu/workspace/wp-includes/plugin.php:524
+[22-Nov-2016 20:51:19 UTC] PHP Fatal error:  Cannot use object of type WP_Error as array in /home/ubuntu/workspace/wp-content/themes/Divi/includes/builder/core.php on line 717
+[22-Nov-2016 20:51:19 UTC] PHP Stack trace:
+[22-Nov-2016 20:51:19 UTC] PHP   1. {main}() /home/ubuntu/workspace/wp-admin/admin-ajax.php:0
+[22-Nov-2016 20:51:19 UTC] PHP   2. do_action() /home/ubuntu/workspace/wp-admin/admin-ajax.php:91
+[22-Nov-2016 20:51:19 UTC] PHP   3. call_user_func_array:{/home/ubuntu/workspace/wp-includes/plugin.php:524}() /home/ubuntu/workspace/wp-includes/plugin.php:524
+[22-Nov-2016 20:51:19 UTC] PHP   4. et_pb_save_layout() /home/ubuntu/workspace/wp-includes/plugin.php:524
+[22-Nov-2016 20:51:19 UTC] PHP   5. et_pb_submit_layout() /home/ubuntu/workspace/wp-content/themes/Divi/includes/builder/core.php:754
+[22-Nov-2016 20:51:19 UTC] PHP   6. et_pb_create_layout() /home/ubuntu/workspace/wp-content/themes/Divi/includes/builder/core.php:689
