@@ -619,6 +619,12 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 		$bg_img_1                = $this->shortcode_atts['bg_img_1'];
 		$bg_img_2                = $this->shortcode_atts['bg_img_2'];
 		$bg_img_3                = $this->shortcode_atts['bg_img_3'];
+		$parallax_1              = $this->shortcode_atts['parallax_1'];
+		$parallax_2              = $this->shortcode_atts['parallax_2'];
+		$parallax_3              = $this->shortcode_atts['parallax_3'];
+		$parallax_method_1       = $this->shortcode_atts['parallax_method_1'];
+		$parallax_method_2       = $this->shortcode_atts['parallax_method_2'];
+		$parallax_method_3       = $this->shortcode_atts['parallax_method_3'];
 		$padding_top_1           = $this->shortcode_atts['padding_top_1'];
 		$padding_right_1         = $this->shortcode_atts['padding_right_1'];
 		$padding_bottom_1        = $this->shortcode_atts['padding_bottom_1'];
@@ -735,6 +741,12 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 				),
 			);
 
+			$et_pb_column_parallax = array(
+				array( $parallax_1, $parallax_method_1 ),
+				array( $parallax_2, $parallax_method_2 ),
+				array( $parallax_3, $parallax_method_3 ),
+			);
+
 			if ( 'on' === $make_fullwidth && 'off' === $use_custom_width ) {
 				$module_class .= ' et_pb_specialty_fullwidth';
 			}
@@ -760,6 +772,7 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 			$internal_columns_settings_array = array(
 				'keep_column_padding_mobile' => 'on',
 				'et_pb_column_backgrounds' => $et_pb_column_backgrounds,
+				'et_pb_column_parallax' => $et_pb_column_parallax,
 				'et_pb_columns_counter' => $et_pb_columns_counter,
 				'et_pb_column_paddings' => $et_pb_column_paddings,
 				'et_pb_column_paddings_mobile' => $et_pb_column_paddings_mobile,
@@ -2031,6 +2044,7 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 			'custom_css_after_1',
 			'custom_css_after_2',
 			'custom_css_after_3',
+			'admin_label'
 		);
 
 		$this->fields_defaults = array(
@@ -2295,6 +2309,11 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 				'additional_att'  => 'disable_on',
 				'option_category' => 'configuration',
 				'description'     => esc_html__( 'This will disable the module on selected devices', 'et_builder' ),
+			),
+			'admin_label' => array(
+				'label'       => esc_html__( 'Admin Label', 'et_builder' ),
+				'type'        => 'text',
+				'description' => esc_html__( 'This will change the label of the row in the builder for easy identification when collapsed.', 'et_builder' ),
 			),
 			'module_id' => array(
 				'label'           => esc_html__( 'CSS ID', 'et_builder' ),
@@ -2622,6 +2641,7 @@ class ET_Builder_Column extends ET_Builder_Structure_Element {
 			$paddings_mobile_array = isset( $et_pb_all_column_settings[ $current_row_position ] ) ? $et_pb_all_column_settings[ $current_row_position ]['et_pb_column_paddings_mobile'] : array();
 			$column_css_array = isset( $et_pb_all_column_settings[ $current_row_position ] ) ? $et_pb_all_column_settings[ $current_row_position ]['et_pb_column_css'] : array();
 			$keep_column_padding_mobile = isset( $et_pb_all_column_settings[ $current_row_position ] ) ? $et_pb_all_column_settings[ $current_row_position ]['keep_column_padding_mobile'] : 'on';
+			$column_parallax = isset( $et_pb_all_column_settings[ $current_row_position ] ) && isset( $et_pb_all_column_settings[ $current_row_position ]['et_pb_column_parallax'] ) ? $et_pb_all_column_settings[ $current_row_position ]['et_pb_column_parallax'] : '';
 			if ( isset( $et_pb_all_column_settings[ $current_row_position ] ) ) {
 				$et_pb_all_column_settings[ $current_row_position ]['et_pb_columns_counter']++;
 			}
@@ -2633,13 +2653,14 @@ class ET_Builder_Column extends ET_Builder_Structure_Element {
 			$et_pb_all_column_settings_inner[ $current_row_position ]['et_pb_columns_inner_counter']++;
 			$paddings_mobile_array = $et_pb_all_column_settings_inner[ $current_row_position ]['et_pb_column_inner_paddings_mobile'];
 			$keep_column_padding_mobile = $et_pb_all_column_settings_inner[ $current_row_position ]['keep_column_padding_mobile'];
+			$column_parallax = isset( $et_pb_all_column_settings_inner[ $current_row_position ] ) && isset( $et_pb_all_column_settings_inner[ $current_row_position ]['et_pb_column_parallax'] ) ? $et_pb_all_column_settings_inner[ $current_row_position ]['et_pb_column_parallax'] : '';
 		}
 
 		$background_color = isset( $backgrounds_array[$array_index][0] ) ? $backgrounds_array[$array_index][0] : '';
 		$background_img = isset( $backgrounds_array[$array_index][1] ) ? $backgrounds_array[$array_index][1] : '';
 		$padding_values = isset( $paddings_array[$array_index] ) ? $paddings_array[$array_index] : array();
 		$padding_mobile_values = isset( $paddings_mobile_array[$array_index] ) ? $paddings_mobile_array[$array_index] : array();
-		$parallax_method = isset( $et_pb_column_parallax[$array_index][0] ) && 'on' === $et_pb_column_parallax[$array_index][0] ? $et_pb_column_parallax[$array_index][1] : '';
+		$parallax_method = isset( $column_parallax[$array_index][0] ) && 'on' === $column_parallax[$array_index][0] ? $column_parallax[$array_index][1] : '';
 		$custom_css_class = isset( $column_css_array['css_class'][$array_index] ) ? ' ' . $column_css_array['css_class'][$array_index] : '';
 		$custom_css_id = isset( $column_css_array['css_id'][$array_index] ) ? $column_css_array['css_id'][$array_index] : '';
 		$custom_css_before = isset( $column_css_array['custom_css_before'][$array_index] ) ? $column_css_array['custom_css_before'][$array_index] : '';

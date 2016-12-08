@@ -1616,6 +1616,11 @@ function et_increase_memory_limit() {
 		return;
 	}
 
+	// proceed only if current memory limit < 128
+	if ( intval( @ini_get( 'memory_limit' ) ) >= 128 ) {
+		return false;
+	}
+
 	if ( true === strpos( ini_get( 'disable_functions' ), 'ini_set' ) ) {
 		return false;
 	}
@@ -2954,3 +2959,31 @@ function et_fb_prepare_ssl_link( $link ) {
 
  	return $link;
 }
+
+/**
+ * Filterable options for backend and visual builder. Designed to be filtered
+ * by theme/plugin since builder is shared accross Divi, Extra, and Divi Builder
+ * @return array builder options values
+ */
+if ( ! function_exists( 'et_builder_options' ) ) :
+function et_builder_options() {
+	return apply_filters( 'et_builder_options', array(
+		'all_buttons_icon' => 'yes', // Default appearance of button icon
+	) );
+}
+endif;
+
+/**
+ * Get specific builder option (fetched from et_builder_options())
+ * @param string option name
+ * @return mixed builder option value
+ */
+if ( ! function_exists( 'et_builder_option' ) ) :
+function et_builder_option( $name ) {
+	$options = et_builder_options();
+
+	$option = isset( $options[ $name ] ) ? $options[ $name ] : false;
+
+	return apply_filters( "et_builder_option_{$name}", $option );
+}
+endif;

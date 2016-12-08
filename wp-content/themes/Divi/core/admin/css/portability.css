@@ -43,12 +43,21 @@
 	overflow: hidden;
 }
 
+.rtl .et-core-portability-import-placeholder {
+	float: right;
+}
+
 .et-core-portability-import-form input[type="file"] {
 	position: absolute;
 	left: 0;
 	top: 0;
 	height: 40px;
 	opacity: 0;
+}
+
+.rtl .et-core-portability-import-form input[type="file"] {
+	left: auto;
+	right: 0;
 }
 
 .et-core-portability-import-placeholder {
@@ -61,6 +70,10 @@
 
 .et-core-portability-import-form .et-core-button {
 	float: left;
+}
+
+.rtl .et-core-portability-import-form .et-core-button {
+	float: right;
 }
 
 /*-----------------------------------------------------------------------------
@@ -124,5 +137,4 @@
 .customize-controls-close[data-et-core-modal*="data-et-core-portability"]:before {
 	font-size: 13px;
 	left: 15px;
-	top: 2px;
 }

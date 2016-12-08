@@ -59,7 +59,7 @@ function et_fb_add_body_class( $classes ) {
 	$classes[] = 'et-fb';
 
 	foreach ( $classes as $key => $value ) {
-		if ( 'rtl' === $value ) {
+		if ( 'rtl' === $value && 'on' === et_get_option( 'divi_disable_translations', 'off' ) ) {
 			unset( $classes[ $key ] );
 			break;
 		}

@@ -444,7 +444,11 @@
 
 			picker.val( control.setting() ).wpColorPicker({
 				change: function() {
-					control.setting.set( picker.wpColorPicker('color') );
+					var et_color_picker_value = picker.wpColorPicker('color');
+
+					if ( '' !== et_color_picker_value ) {
+						control.setting.set( et_color_picker_value );
+					}
 				},
 				clear: function() {
 					control.setting.set( false );

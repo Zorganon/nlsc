@@ -168,6 +168,12 @@ body button.et-core-button {
 	font-family: 'Open Sans', sans-serif !important;
 }
 
+.rtl .et-core-button,
+body.rtl button.et-core-button {
+	margin-right: 7px;
+	margin-left: 0;
+}
+
 .et-core-button:focus,
 .et-core-button:hover,
 .et-core-button:active {
@@ -296,6 +302,11 @@ body button.et-core-button {
 	background-color: #622aa9;
 	-webkit-transition: background .5s;
 	transition: background .5s;
+}
+
+.rtl .et-core-modal-close {
+	right: auto;
+	left: 0;
 }
 
 .et-core-modal-close:hover,
@@ -522,6 +533,11 @@ body button.et-core-button {
 	margin: 0;
 	border: none;
 	background: none;
+}
+
+.rtl .et-core-tabs li,
+.rtl .et-core-tabs li.ui-state-default {
+	float: right;
 }
 
 .et-core-tabs li a,

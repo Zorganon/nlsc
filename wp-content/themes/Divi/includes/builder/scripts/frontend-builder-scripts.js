@@ -104,10 +104,20 @@
 					} );
 
 					// swipe support requires et-jquery-touch-mobile
-					$et_slider.find( settings.slide ).on( 'swipeleft', function() {
+					$et_slider.find( settings.slide ).on( 'swipeleft', function( event ) {
+						// do not switch slide on selecting text in VB
+						if ( $( event.target ).closest( '.et-fb-popover-tinymce' ).length || $( event.target ).closest( '.et-fb-editable-element' ).length ) {
+							return;
+						}
+
 						$et_slider.et_slider_move_to( 'next' );
 					});
-					$et_slider.find( settings.slide ).on( 'swiperight', function() {
+					$et_slider.find( settings.slide ).on( 'swiperight', function( event ) {
+						// do not switch slide on selecting text in VB
+						if ( $( event.target ).closest( '.et-fb-popover-tinymce' ).length || $( event.target ).closest( '.et-fb-editable-element' ).length ) {
+							return;
+						}
+
 						$et_slider.et_slider_move_to( 'previous' );
 					});
 				}
@@ -115,6 +125,10 @@
 				if ( settings.use_controls && et_slides_number > 1 ) {
 					for ( var i = 1; i <= et_slides_number; i++ ) {
 						controls_html += '<a href="#"' + ( i == 1 ? ' class="' + settings.control_active_class + '"' : '' ) + '>' + i + '</a>';
+					}
+
+					if ($et_slider.find('video').length > 0) {
+						settings.controls_class += ' et-pb-controllers-has-video-tag';
 					}
 
 					controls_html =
@@ -275,11 +289,11 @@
 				}
 
 				function et_get_bg_layout_color( $slide ) {
-					if ( $slide.hasClass( 'et_pb_bg_layout_dark' ) ) {
-						return 'et_pb_bg_layout_dark';
+					if ( $slide.hasClass( 'et_pb_bg_layout_light' ) ) {
+						return 'et_pb_bg_layout_light';
 					}
 
-					return 'et_pb_bg_layout_light';
+					return 'et_pb_bg_layout_dark';
 				}
 
 				function et_maybe_set_controls_color( $slide ) {
@@ -450,8 +464,10 @@
 						} );
 					}
 
-					// reinit parallax on slide change to make sure it displayed correctly
-					window.et_pb_parallax_init( $next_slide );
+					if ( $next_slide.find( '.et_parallax_bg' ).length ) {
+						// reinit parallax on slide change to make sure it displayed correctly
+						window.et_pb_parallax_init( $next_slide.find( '.et_parallax_bg' ) );
+					}
 
 					et_slider_auto_rotate();
 				}
@@ -2587,7 +2603,7 @@
 				}
 			}
 
-			$( '.et_pb_section' ).on( 'click', '.et_pb_toggle_title', function() {
+			$( 'body' ).on( 'click', '.et_pb_toggle_title', function() {
 				var $this_heading         = $(this),
 					$module               = $this_heading.closest('.et_pb_toggle'),
 					$section              = $module.parents( '.et_pb_section' ),
@@ -2811,7 +2827,7 @@
 			window.et_pb_play_overlayed_video = function( $play_video ) {
 				var $this        = $play_video,
 					$video_image = $this.closest('.et_pb_video_overlay'),
-					$wrapper     = $this.closest('.et_pb_video, .et_main_video_container'),
+					$wrapper     = $this.closest('.et_pb_video, .et_main_video_container, .et_pb_video_wrap'),
 					$video_iframe = $wrapper.find('iframe'),
 					is_embedded = $video_iframe.length ? true : false,
 					video_iframe_src,
@@ -2928,7 +2944,10 @@
 					var $slide_section = $(this).parent( '.et_pb_section' ),
 						$slide = $(this).find( '.et_pb_slide' ),
 						$slide_container = $slide.find( '.et_pb_container' ),
-						max_height = 0;
+						max_height = 0,
+						image_margin = 0,
+						need_image_margin_top = $(this).hasClass( 'et_pb_post_slider_image_top' ),
+						need_image_margin_bottom = $(this).hasClass( 'et_pb_post_slider_image_bottom' );
 
 					// If this is appears at the first section benath transparent nav, skip it
 					// leave it to et_fix_page_container_position()
@@ -2938,15 +2957,34 @@
 
 					$slide_container.css( 'min-height', 0 );
 
+					// make slides visible to calculate the height correctly
+					$slide.addClass( 'et_pb_temp_slide' );
+
 					$slide.each( function() {
 						var $this_el = $(this),
-							height = $this_el.innerHeight();
+							height = $this_el.innerHeight(),
+							$slide_image = $this_el.find( '.et_pb_slide_image' );
 
-						if ( max_height < height )
+						if ( need_image_margin_top || need_image_margin_bottom ) {
+							if ( $slide_image.length ) {
+								// get the margin from slides with image
+								image_margin = need_image_margin_top ? parseFloat( $slide_image.css( 'margin-top' ) ) : parseFloat( $slide_image.css( 'margin-bottom' ) );
+								image_margin += 10;
+							} else {
+								// add class to slides without image to adjust their height accordingly
+								$this_el.find( '.et_pb_container' ).addClass( 'et_pb_no_image' );
+							}
+						}
+
+						if ( max_height < height ) {
 							max_height = height;
+						}
 					} );
 
-					$slide_container.css( 'min-height', max_height );
+					$slide_container.css( 'min-height', max_height + image_margin );
+
+					// remove temp class after getting the slider height
+					$slide.removeClass( 'et_pb_temp_slide' );
 				} );
 			}
 
@@ -2969,7 +3007,7 @@
 			}
 			et_fix_nav_direction();
 
-			et_pb_form_placeholders_init( $( '.et_pb_newsletter_form' ) );
+			et_pb_form_placeholders_init( $( '.et_pb_newsletter_form, .et_pb_comments_module #commentform' ) );
 
 			$('.et_pb_fullwidth_menu ul.nav').each(function(i) {
 				i++;
@@ -3719,38 +3757,95 @@
 
 			} );
 
-			if ( $( '.et_pb_search' ).length ) {
-				$( '.et_pb_search' ).each( function() {
-					var $this_module = $( this ),
-						$input_field = $this_module.find( '.et_pb_s' ),
-						$button = $this_module.find( '.et_pb_searchsubmit' ),
-						input_padding = $this_module.hasClass( 'et_pb_text_align_right' ) ? 'paddingLeft' : 'paddingRight',
-						disabled_button = $this_module.hasClass( 'et_pb_hide_search_button' );
+			window.et_pb_search_init = function( $search ) {
+				var $input_field = $search.find( '.et_pb_s' ),
+					$button = $search.find( '.et_pb_searchsubmit' ),
+					input_padding = $search.hasClass( 'et_pb_text_align_right' ) ? 'paddingLeft' : 'paddingRight',
+					disabled_button = $search.hasClass( 'et_pb_hide_search_button' );
 
-					if ( $button.innerHeight() > $input_field.innerHeight() ) {
-						$input_field.height( $button.innerHeight() );
-					}
+				if ( $button.innerHeight() > $input_field.innerHeight() ) {
+					$input_field.height( $button.innerHeight() );
+				}
 
-					if ( ! disabled_button ) {
-						$input_field.css( input_padding, $button.innerWidth() + 10 );
-					}
+				if ( ! disabled_button ) {
+					$input_field.css( input_padding, $button.innerWidth() + 10 );
+				}
+			}
+
+			/**
+			 * Fix search module which has percentage based custom margin
+			 */
+			window.et_pb_search_percentage_custom_margin_fix = function( $search ) {
+				var inputMargin = $search.find( '.et_pb_s' ).css( 'margin' ).split(' ');
+				var inputMarginObj = {};
+
+				switch(inputMargin.length) {
+					case 4:
+						inputMarginObj = {
+							top: inputMargin[0],
+							right: inputMargin[1],
+							bottom: inputMargin[2],
+							left: inputMargin[3],
+						};
+						break;
+					case 2:
+						inputMarginObj = {
+							top: inputMargin[0],
+							right: inputMargin[1],
+							bottom: inputMargin[0],
+							left: inputMargin[1],
+						};
+						break;
+					default:
+						inputMarginObj = {
+							top: inputMargin[0],
+							right: inputMargin[0],
+							bottom: inputMargin[0],
+							left: inputMargin[0],
+						};
+						break;
+				}
+
+				var inputRight = 0 - parseFloat(inputMarginObj.left) + 'px';
+
+				$search.find('.et_pb_searchsubmit').css({
+					top: inputMarginObj.top,
+					right: inputRight,
+					bottom: inputMarginObj.bottom,
 				});
 			}
+
+			if ( $( '.et_pb_search' ).length ) {
+				$( '.et_pb_search' ).each( function() {
+					var $search = $(this);
+
+					if ( $search.is( '.et_pb_search_percentage_custom_margin' ) ) {
+						et_pb_search_percentage_custom_margin_fix( $search );
+					}
+
+					et_pb_search_init( $search );
+				});
+			}
+
+			window.et_pb_comments_init = function( $comments_module ) {
+				var $comments_module_button = $comments_module.find( '.comment-reply-link, .submit' );
+
+				if ( $comments_module_button.length ) {
+					$comments_module_button.addClass( 'et_pb_button' );
+
+					if ( typeof $comments_module.attr( 'data-icon' ) !== 'undefined' && $comments_module.attr( 'data-icon' ) !== '' ) {
+						$comments_module_button.attr( 'data-icon', $comments_module.attr( 'data-icon' ) );
+						$comments_module_button.addClass( 'et_pb_custom_button_icon' );
+					}
+				}
+			};
 
 			// apply required classes for the Reply buttons in Comments Module
 			if ( $( '.et_pb_comments_module' ).length ) {
 				$( '.et_pb_comments_module' ).each( function() {
-					var $comments_module = $( this ),
-						$comments_module_button = $comments_module.find( '.comment-reply-link' );
+					var $comments_module = $( this );
 
-					if ( $comments_module_button.length ) {
-						$comments_module_button.addClass( 'et_pb_button' );
-
-						if ( typeof $comments_module.data( 'icon' ) !== 'undefined' ) {
-							$comments_module_button.attr( 'data-icon', $comments_module.data( 'icon' ) );
-							$comments_module_button.addClass( 'et_pb_custom_button_icon' );
-						}
-					}
+					et_pb_comments_init( $comments_module );
 				});
 			}
 

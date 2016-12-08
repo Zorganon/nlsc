@@ -2,7 +2,7 @@ var ET_PageBuilder = ET_PageBuilder || {};
 
 window.wp = window.wp || {};
 
-window.et_builder_version = '3.0.18';
+window.et_builder_version = '3.0.23';
 
 ( function($) {
 	var et_error_modal_shown = window.et_error_modal_shown,
@@ -697,7 +697,7 @@ window.et_builder_version = '3.0.18';
 						column_attributes.global_parent_cid = that.model.get( 'global_parent_cid' );
 					}
 
-					if ( '' !== layout_specialty ) {
+					if ( typeof layout_specialty[index] !== 'undefined' && layout_specialty[index] === '1' ) {
 						column_attributes.layout_specialty = layout_specialty[index];
 						column_attributes.specialty_columns = parseInt( specialty_columns );
 					}
@@ -3714,7 +3714,12 @@ window.et_builder_version = '3.0.18';
 									icon_index_number = parseInt( current_symbol_val.replace( /%/g, '' ) );
 									$current_symbol   = $this_icon_list.find( 'li' ).eq( icon_index_number );
 								} else {
-									$current_symbol = $this_icon_list.find( 'li[data-icon="' + current_symbol_val + '"]' );
+									// set the 1st icon as active if wrong value saved for current_symbol_val
+									if ( '"' === current_symbol_val ) {
+										$current_symbol = $this_icon_list.find( 'li' ).eq( 0 );
+									} else {
+										$current_symbol = $this_icon_list.find( 'li[data-icon="' + current_symbol_val + '"]' );
+									}
 								}
 
 								$current_symbol.addClass( active_symbol_class );
@@ -12297,11 +12302,7 @@ window.et_builder_version = '3.0.18';
 		 * Check whether the Yoast SEO plugin is active
 		 */
 		function et_pb_is_yoast_seo_active() {
-			if ( typeof YoastSEO !== 'undefined' && typeof YoastSEO === 'object' ) {
-				return true;
-			}
-
-			return false;
+			return ( 'object' === typeof YoastSEO && YoastSEO.hasOwnProperty( 'app' ) )
 		}
 
 		/**
@@ -12725,6 +12726,11 @@ window.et_builder_version = '3.0.18';
 							} ] );
 							processed_row_view = ET_PageBuilder_Layout.getView( module_id );
 						} else {
+							// structure edit is not allowed for global Rows
+							if ( ( typeof row_view.model.attributes.et_pb_global_module !== 'undefined' && '' !== row_view.model.attributes.et_pb_global_module ) || ( 'row' === et_pb_options.layout_type && 'global' === et_pb_options.is_global_template ) ) {
+								return;
+							}
+
 							// changing structure of exisitng Row
 							processed_row_view = row_view;
 							is_structure_change = true;

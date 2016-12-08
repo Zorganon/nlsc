@@ -44,6 +44,16 @@ function et_fb_modify_comments_request( $params ) {
 	$params->query_vars['type__not_in'] = 'et_pb_comments_random_type_9999';
 }
 
+function et_fb_comments_submit_button( $submit_button ) {
+		return sprintf(
+			'<button name="%1$s" type="submit" id="%2$s" class="%3$s">%4$s</button>',
+			esc_attr( 'submit' ),
+			esc_attr( 'et_pb_submit' ),
+			esc_attr( 'submit et_pb_button' ),
+			esc_html_x( 'Submit Comment', 'et_builder' )
+		);
+}
+
 // comments template cannot be generated via AJAX so prepare it beforehand
 function et_fb_get_comments_markup() {
 	// Modify the comments request to make sure it's unique.
@@ -52,6 +62,9 @@ function et_fb_get_comments_markup() {
 
 	// include custom comments_template to display the comment section with Divi style
 	add_filter( 'comments_template', 'et_fb_comments_template' );
+
+	// Modify submit button to be advanced button style ready
+	add_filter( 'comment_form_submit_button', 'et_fb_comments_submit_button' );
 
 	ob_start();
 	comments_template( '', true );
@@ -127,6 +140,7 @@ function et_fb_backend_helpers() {
 		'modulesWithChildren'          => ET_Builder_Element::get_shortcodes_with_children( $post_type ),
 		'structureModules'             => ET_Builder_Element::get_structure_modules( $post_type ),
 		'et_builder_css_media_queries' => ET_Builder_Element::get_media_quries( 'for_js' ),
+		'builderOptions'               => et_builder_options(),
 		'commentsModuleMarkup'         => et_fb_get_comments_markup(),
 		'shortcode_tags'               => et_fb_shortcode_tags(),
 		'getFontIconSymbols'           => et_pb_get_font_icon_symbols(),
@@ -321,6 +335,7 @@ function et_fb_backend_helpers() {
 				'forgotPassword'  => esc_html__( 'Forgot your password?', 'et_builder' ),
 				'username'        => esc_html__( 'Username', 'et_builder' ),
 				'password'        => esc_html__( 'Password', 'et_builder' ),
+				'note_autofill'   => esc_attr__( 'Note: this field is used to disable browser autofill during the form editing in VB', 'et_builder' ),
 			),
 			'search' => array(
 				'submitButtonText' => esc_html__( 'Search', 'et_builder' ),
@@ -453,6 +468,9 @@ function et_fb_backend_helpers() {
 				'general' => esc_html__( 'General', 'et_builder' ),
 				'design'  => esc_html__( 'Design', 'et_builder' ),
 				'css'     => esc_html__( 'CSS', 'et_builder' ),
+			),
+			'moduleSettings' => array(
+				'title' => esc_html__( '%s Settings', 'et_builder' ),
 			),
 			'pageSettings' => array(
 				'title' => esc_html__( 'Page Settings', 'et_builder' ),
