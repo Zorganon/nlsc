@@ -285,9 +285,61 @@ function et_pb_get_current_user_role() {
 	$current_user = wp_get_current_user();
 	$user_roles = $current_user->roles;
 
-	$role = ! empty( $user_roles ) ? $user_roles[0] : '';
+	// retrieve the role from array if exists or determine it using custom mechanism
+	// $user_roles array may start not from 0 index. Use reset() to retrieve the first value from array regardless its index
+	$role = ! empty( $user_roles ) ? reset( $user_roles ) : et_pb_determine_current_user_role();
 
 	return $role;
+}
+
+/**
+ * Generate the list of all roles ( with editing permissions ) registered in current WP
+ * @return string
+ */
+function et_pb_get_all_roles_list() {
+	// get all roles registered in current WP
+	if ( ! function_exists( 'get_editable_roles' ) ) {
+		require_once( ABSPATH . '/wp-admin/includes/user.php' );
+	}
+
+	$all_roles = get_editable_roles();
+	$builder_roles_array = array();
+
+	if ( ! empty( $all_roles ) ) {
+		foreach( $all_roles as $role => $role_data ) {
+			// add roles with edit_posts capability into $builder_roles_array
+			if ( ! empty( $role_data['capabilities']['edit_posts'] ) && 1 === (int) $role_data['capabilities']['edit_posts'] ) {
+				$builder_roles_array[ $role ] = $role_data['name'];
+			}
+		}
+	}
+
+	// fill the builder roles array with default roles if it's empty
+	if ( empty( $builder_roles_array ) ) {
+		$builder_roles_array = array(
+			'administrator' => esc_html__( 'Administrator', 'et_builder' ),
+			'editor'        => esc_html__( 'Editor', 'et_builder' ),
+			'author'        => esc_html__( 'Author', 'et_builder' ),
+			'contributor'   => esc_html__( 'Contributor', 'et_builder' ),
+		);
+	}
+
+	return $builder_roles_array;
+}
+
+/**
+ * Determine the current user role by checking every single registered role via current_user_can()
+ * @return string
+ */
+function et_pb_determine_current_user_role() {
+	$all_roles = et_pb_get_all_roles_list();
+
+	// go through all the registered roles and return the one current user have
+	foreach( $all_roles as $role => $role_data ) {
+		if ( current_user_can( $role ) ) {
+			return $role;
+		}
+	}
 }
 
 function et_pb_show_all_layouts_built_for_post_type( $post_type ) {
@@ -2111,24 +2163,6 @@ function et_fb_is_enabled( $post_id = false ) {
 }
 endif;
 
-if ( ! function_exists( 'et_fb_is_retrieving_builder_data' ) ) :
-function et_fb_is_retrieving_builder_data() {
-	if ( ! isset( $_POST['et_fb_helper_nonce'] ) || ! wp_verify_nonce( $_POST['et_fb_helper_nonce'], 'et_fb_backend_helper_nonce' ) ) {
-		return false;
-	}
-
-	if ( ! current_user_can( 'edit_posts' ) ) {
-		return false;
-	}
-
-	if ( isset( $_POST['action'] ) && 'et_fb_retrieve_builder_data' === $_POST['action'] ) {
-		return true;
-	}
-
-	return false;
-}
-endif;
-
 if ( ! function_exists( 'et_fb_auto_activate_builder' ) ) :
 function et_fb_auto_activate_builder() {
 	$post_id = get_the_ID();
@@ -2987,3 +3021,73 @@ function et_builder_option( $name ) {
 	return apply_filters( "et_builder_option_{$name}", $option );
 }
 endif;
+
+/**
+ * Pass thru semantical previously escaped acknowledgement
+ * @param string value being passed through
+ * @return string
+ */
+function et_esc_previously( $passthru ) {
+	return $passthru;
+}
+
+/**
+ * Pass thru semantical escaped by WordPress core acknowledgement
+ * @param string value being passed through
+ * @return string
+ */
+
+function et_esc_wp( $passthru ) {
+	return $passthru;
+}
+
+/**
+ * Pass thru semantical intentionally unescaped acknowledgement
+ * @param string value being passed through
+ * @param string excuse the value is allowed to be unescaped
+ * @return string
+ */
+
+function et_intentionally_unescaped( $passthru, $excuse ) {
+	// Add valid excuses as they arise
+	$valid_excuses = array(
+		'cap_based_sanitized',
+		'fixed_string',
+	);
+
+	if ( ! in_array( $excuse, $valid_excuses ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'This is not a valid excuse to not escape the passed value.', 'et_builder' ), et_get_theme_version() );
+	}
+
+	return $passthru;
+}
+
+/**
+ * Sanitize value depending on user capability
+ * @return string value being passed through
+ */
+function et_sanitize_value_by_cap( $passthru, $sanitize_function = 'et_sanitize_html_input_text', $cap = 'unfiltered_html' ) {
+	if ( ! current_user_can( $cap ) ) {
+		$passthru = $sanitize_function( $passthru );
+	}
+
+	return $passthru;
+}
+
+/**
+ * Pass thru semantical intentionally unsanitized acknowledgement
+ * @param string value being passed through
+ * @param string excuse the value is allowed to be unsanitized
+ * @return string
+ */
+
+function et_intentionally_unsanitized( $passthru, $excuse ) {
+	// Add valid excuses as they arise
+	$valid_excuses = array();
+
+	if ( ! in_array( $excuse, $valid_excuses ) ) {
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'This is not a valid excuse to not sanitize the passed value.', 'et_builder' ), et_get_theme_version() );
+	}
+
+	return $passthru;
+}

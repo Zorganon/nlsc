@@ -24,6 +24,10 @@ if ( defined( 'DOING_AJAX' ) && DOING_AJAX && ! is_customize_preview() ) {
 		'et_fb_retrieve_builder_data'
 	);
 
+	if ( class_exists( 'Easy_Digital_Downloads') ) {
+		$builder_load_actions[] = 'edd_load_gateway';
+	}
+
 	$force_builder_load = isset( $_POST['et_load_builder_modules'] ) && '1' === $_POST['et_load_builder_modules'];
 
 	if ( ! $force_builder_load && ( ! isset( $_REQUEST['action'] ) || ! in_array( $_REQUEST['action'], $builder_load_actions ) ) ) {
@@ -85,6 +89,7 @@ function et_builder_load_modules_styles() {
 		'next'                   => esc_html__( 'Next', 'et_builder' ),
 		'wrong_captcha'          => esc_html__( 'You entered the wrong number in captcha.', 'et_builder' ),
 		'is_builder_plugin_used' => et_is_builder_plugin_active(),
+		'ignore_waypoints'       => et_is_ignore_waypoints() ? 'yes' : 'no',
 		'is_divi_theme_used'     => function_exists( 'et_divi_fonts_url' ),
 		'widget_search_selector' => apply_filters( 'et_pb_widget_search_selector', '.widget_search' ),
 		'is_ab_testing_active'   => et_is_ab_testing_active(),
@@ -137,6 +142,40 @@ function et_builder_load_modules_styles() {
 add_action( 'wp_enqueue_scripts', 'et_builder_load_modules_styles', 11 );
 
 /**
+ * Determine whether current theme supports Waypoints or not
+ * @return bool
+ */
+function et_is_ignore_waypoints() {
+	// WPBakery Visual Composer plugin conflicts with waypoints
+	if ( class_exists( 'Vc_Manager' ) ) {
+		return true;
+	}
+
+	// always return false if not in divi plugin
+	if ( ! et_is_builder_plugin_active() ) {
+		return false;
+	}
+
+	$theme_data = wp_get_theme();
+
+	if ( empty( $theme_data ) ) {
+		return false;
+	}
+
+	// list of themes without Waypoints support
+	$no_waypoints_themes = apply_filters( 'et_pb_no_waypoints_themes', array(
+		'Avada'
+	) );
+
+	// return true if current theme doesn't support Waypoints
+	if ( in_array( $theme_data->Name, $no_waypoints_themes, true ) ) {
+		return true;
+	}
+
+	return false;
+}
+
+/**
  * Determine whether current page has enqueued theme's style.css or not
  * This is mainly used on preview screen to decide to enqueue theme's style nor not
  * @return bool
@@ -183,6 +222,7 @@ if ( ! function_exists( 'et_builder_load_framework' ) ) :
 function et_builder_load_framework() {
 
 	require ET_BUILDER_DIR . 'functions.php';
+	require ET_BUILDER_DIR . 'compat/woocommerce.php';
 
 	if ( is_admin() ) {
 		global $pagenow, $et_current_memory_limit;
@@ -199,6 +239,8 @@ function et_builder_load_framework() {
 
 		require ET_BUILDER_DIR . 'layouts.php';
 		require ET_BUILDER_DIR . 'class-et-builder-element.php';
+		require ET_BUILDER_DIR . 'class-et-builder-plugin-compat-base.php';
+		require ET_BUILDER_DIR . 'class-et-builder-plugin-compat-loader.php';
 		require ET_BUILDER_DIR . 'class-et-global-settings.php';
 		require ET_BUILDER_DIR . 'ab-testing.php';
 
@@ -247,5 +289,50 @@ function et_pb_enqueue_google_maps_script() {
 	);
 }
 endif;
+
+/**
+ * Add pseudo-action via the_content to hook filter/action at the end of main content
+ * @param string  content string
+ * @return string content string
+ */
+function et_pb_content_main_query( $content ) {
+	global $post, $et_pb_comments_print;
+
+	// Perform filter on main query + if builder is used only
+	if ( is_main_query() && et_pb_is_pagebuilder_used( get_the_ID() ) ) {
+		add_filter( 'comment_class', 'et_pb_add_non_builder_comment_class', 10, 5 );
+
+		// Actual front-end only adjustment. has_shortcode() can't use passed $content since
+		// Its shortcode has been parsed
+		if ( false === $et_pb_comments_print && ! et_fb_is_enabled() && has_shortcode( $post->post_content, 'et_pb_comments' ) ) {
+			add_filter( 'get_comments_number', '__return_zero' );
+			add_filter( 'comments_open', '__return_false' );
+			add_filter( 'comments_array', '__return_empty_array' );
+		}
+	}
+
+	return $content;
+}
+add_filter( 'the_content', 'et_pb_content_main_query', 1500 );
+
+/**
+ * Added special class name for comment items that are placed outside builder
+ *
+ * See {@see 'comment_class'}.
+ *
+ * @param  array       $classes    classname
+ * @param  string      $comment    comma separated list of additional classes
+ * @param  int         $comment_ID comment ID
+ * @param  WP_Comment  $comment    comment object
+ * @param  int|WP_Post $post_id    post ID or WP_Post object
+ *
+ * @return array modified classname
+ */
+function et_pb_add_non_builder_comment_class( $classes, $class, $comment_ID, $comment, $post_id ) {
+
+	$classes[] = 'et-pb-non-builder-comment';
+
+	return $classes;
+}
 
 et_builder_load_framework();

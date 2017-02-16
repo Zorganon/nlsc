@@ -13,8 +13,8 @@ function front_end_login_fail( $username ) {
 $referrer = $_SERVER['HTTP_REFERER'];    
 // if there's a valid referrer, and it's not the default log-in screen
 if( !empty( $referrer ) && !strstr( $referrer,'wp-login' ) && !strstr( $referrer,'wp-admin' ) ) {
-    wp_redirect( get_permalink( 430 ) . "?login=failed" ); 
-    exit;
+  wp_redirect( get_permalink( 430 ) . "?login=failed" ); 
+  exit;
 }
 
 }
@@ -26,17 +26,28 @@ if( !empty( $referrer ) && !strstr( $referrer,'wp-login' ) && !strstr( $referrer
 add_action( 'authenticate', 'check_username_password', 1, 3);
 function check_username_password( $login, $username, $password ) {
 
-// Getting URL of the login page
-$referrer = $_SERVER['HTTP_REFERER'];
+  // Getting URL of the login page
+  $referrer = $_SERVER['HTTP_REFERER'];
 
-// if there's a valid referrer, and it's not the default log-in screen
-if( !empty( $referrer ) && !strstr( $referrer,'wp-login' ) && !strstr( $referrer,'wp-admin' ) ) { 
+  // if there's a valid referrer, and it's not the default log-in screen
+  if( !empty( $referrer ) && !strstr( $referrer,'wp-login' ) && !strstr( $referrer,'wp-admin' ) ) { 
     if( $username == "" || $password == "" ){
-        wp_redirect( get_permalink( 430 ) . "?login=empty" );
-        exit;
+      wp_redirect( get_permalink( 430 ) . "?login=empty" );
+      exit;
     }
-}
+  }
 
 }
-// Replace my constant 'LOGIN_PAGE_ID' with your custom login page id.
+
+/**
+ * Code for a Login/Logout Button to be displayed in the Navigation Menu
+ * 
+ **/
+add_filter( 'wp_nav_menu_primary_items','wpsites_loginout_menu_link' );
+
+function wpsites_loginout_menu_link( $menu ) {
+  $loginout = wp_loginout($_SERVER['REQUEST_URI'], false );
+  $menu .= $loginout;
+  return $menu;
+}
 ?>

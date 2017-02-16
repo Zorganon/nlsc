@@ -27,6 +27,7 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 			'custom_padding',
 			'custom_padding_tablet',
 			'custom_padding_phone',
+			'custom_padding_last_edited',
 			'padding_mobile',
 			'module_id',
 			'module_class',
@@ -90,7 +91,7 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 			'inner_shadow'           => array( 'off' ),
 			'parallax'               => array( 'off' ),
 			'parallax_method'        => array( 'on' ),
-			'padding_mobile'         => array( 'off' ),
+			'padding_mobile'         => array( '' ),
 			'make_fullwidth'         => array( 'off' ),
 			'use_custom_width'       => array( 'off' ),
 			'width_unit'             => array( 'off' ),
@@ -241,13 +242,7 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 			),
 			'padding_mobile' => array(
 				'label'             => esc_html__( 'Keep Custom Padding on Mobile', 'et_builder' ),
-				'type'              => 'yes_no_button',
-				'option_category'   => 'layout',
-				'options'           => array(
-					'off' => esc_html__( 'No', 'et_builder' ),
-					'on'  => esc_html__( 'Yes', 'et_builder' ),
-				),
-				'description'       => esc_html__( 'Allow custom padding to be retained on mobile screens', 'et_builder' ),
+				'type'              => 'skip', // Remaining attribute for backward compatibility
 			),
 			'make_fullwidth' => array(
 				'label'             => esc_html__( 'Make This Section Fullwidth', 'et_builder' ),
@@ -542,6 +537,10 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 				'option_category' => 'configuration',
 				'tab_slug'        => 'custom_css',
 			),
+			'custom_padding_last_edited' =>array(
+				'type'     => 'skip',
+				'tab_slug' => 'advanced',
+			),
 			'__video_background' => array(
 				'type' => 'computed',
 				'computed_callback' => array( 'ET_Builder_Section', 'get_video_background' ),
@@ -553,13 +552,6 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 				),
 			),
 		);
-
-		if ( et_fb_is_enabled() || et_fb_is_retrieving_builder_data() ) {
-			$fields["custom_padding_last_edited"] = array(
-				'type'     => 'skip',
-				'tab_slug' => 'advanced',
-			);
-		}
 
 		return $fields;
 	}
@@ -612,7 +604,7 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 		$custom_padding          = $this->shortcode_atts['custom_padding'];
 		$custom_padding_tablet   = $this->shortcode_atts['custom_padding_tablet'];
 		$custom_padding_phone    = $this->shortcode_atts['custom_padding_phone'];
-		$padding_mobile          = $this->shortcode_atts['padding_mobile'];
+		$custom_padding_last_edited = $this->shortcode_atts['custom_padding_last_edited'];
 		$background_color_1      = $this->shortcode_atts['background_color_1'];
 		$background_color_2      = $this->shortcode_atts['background_color_2'];
 		$background_color_3      = $this->shortcode_atts['background_color_3'];
@@ -643,6 +635,7 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 		$padding_1_phone         = $this->shortcode_atts['padding_1_phone'];
 		$padding_2_phone         = $this->shortcode_atts['padding_2_phone'];
 		$padding_3_phone         = $this->shortcode_atts['padding_3_phone'];
+		$padding_mobile          = $this->shortcode_atts['padding_mobile'];
 		$gutter_width            = $this->shortcode_atts['gutter_width'];
 		$use_custom_width        = $this->shortcode_atts['use_custom_width'];
 		$custom_width_px         = $this->shortcode_atts['custom_width_px'];
@@ -679,9 +672,14 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 		$module_class = ET_Builder_Element::add_module_order_class( $module_class, $function_name );
 		$gutter_class = '';
 
-		$padding_mobile_values = array(
+		$custom_padding_responsive_active = et_pb_get_responsive_status( $custom_padding_last_edited );
+
+		$padding_mobile_values = $custom_padding_responsive_active ? array(
 			'tablet' => explode( '|', $custom_padding_tablet ),
 			'phone'  => explode( '|', $custom_padding_phone ),
+		) : array(
+			'tablet' => false,
+			'phone' => false,
 		);
 
 		if ( 'on' === $specialty ) {
@@ -868,7 +866,10 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 						),
 					);
 
-					if ( 'on' !== $padding_mobile ) {
+					// Backward compatibility. Keep Padding on Mobile is deprecated in favour of responsive inputs mechanism for custom padding
+					// To ensure that it is compatibility with previous version of Divi, this option is now only used as last resort if no
+					// responsive padding value is found,  and padding_mobile value is saved (which is set to off by default)
+					if ( in_array( $padding_mobile, array( 'on', 'off' ) ) && 'on' !== $padding_mobile && ! $custom_padding_responsive_active ) {
 						$element_style['media_query'] = ET_Builder_Element::get_media_query( 'min_width_981' );
 					}
 
@@ -903,7 +904,7 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 		}
 
 		$output = sprintf(
-			'<div%7$s class="et_pb_section%3$s%4$s%5$s%6$s%8$s%12$s%13$s">
+			'<div%7$s class="et_pb_section%3$s%4$s%5$s%6$s%8$s%12$s%13$s"%14$s>
 				%11$s
 				%9$s
 					%2$s
@@ -932,7 +933,8 @@ class ET_Builder_Section extends ET_Builder_Structure_Element {
 				: ''
 			),
 			( 'on' === $specialty ? ' et_section_specialty' : ' et_section_regular' ),
-			( 'on' === $transparent_background ? ' et_section_transparent' : '' )
+			( 'on' === $transparent_background ? ' et_section_transparent' : '' ),
+			$this->get_module_data_attributes()
 		);
 
 		if ( 'on' === $specialty ) {
@@ -981,6 +983,7 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 			'custom_padding',
 			'custom_padding_tablet',
 			'custom_padding_phone',
+			'custom_padding_last_edited',
 			'padding_mobile',
 			'column_padding_mobile',
 			'module_id',
@@ -1028,6 +1031,10 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 			'padding_2_phone',
 			'padding_3_phone',
 			'padding_4_phone',
+			'padding_1_last_edited',
+			'padding_2_last_edited',
+			'padding_3_last_edited',
+			'padding_4_last_edited',
 			'admin_label',
 			'parallax_1',
 			'parallax_method_1',
@@ -1067,8 +1074,8 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 			'custom_width_percent'  => array( '80%', 'only_default_setting' ),
 			'use_custom_gutter'     => array( 'off' ),
 			'gutter_width'          => array( et_get_option( 'gutter_width', 3 ) ),
-			'padding_mobile'        => array( 'off' ),
-			'column_padding_mobile' => array( 'on' ),
+			'padding_mobile'        => array( '' ),
+			'column_padding_mobile' => array( '' ),
 			'background_color'      => array( '', 'only_default_setting' ),
 			'allow_player_pause'    => array( 'off' ),
 			'parallax'              => array( 'off' ),
@@ -1201,13 +1208,7 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 			),
 			'padding_mobile' => array(
 				'label'             => esc_html__( 'Keep Custom Padding on Mobile', 'et_builder' ),
-				'type'              => 'yes_no_button',
-				'option_category'   => 'layout',
-				'options'           => array(
-					'off' => esc_html__( 'No', 'et_builder' ),
-					'on'  => esc_html__( 'Yes', 'et_builder' ),
-				),
-				'description'       => esc_html__( 'Allow custom padding to be retained on mobile screens', 'et_builder' ),
+				'type'              => 'skip', // Remaining attribute for backward compatibility
 			),
 			'custom_margin' => array(
 				'label'           => esc_html__( 'Custom Margin', 'et_builder' ),
@@ -1325,13 +1326,7 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 			),
 			'column_padding_mobile' => array(
 				'label'             => esc_html__( 'Keep Column Padding on Mobile', 'et_builder' ),
-				'type'              => 'yes_no_button',
-				'option_category'   => 'configuration',
-				'tab_slug'          => 'advanced',
-				'options'           => array(
-					'on'  => esc_html__( 'Yes', 'et_builder' ),
-					'off' => esc_html__( 'No', 'et_builder' ),
-				),
+				'type'              => 'skip', // Remaining attribute for backward compatibility
 			),
 			'background_color_1' => array(
 				'type' => 'skip',
@@ -1453,6 +1448,18 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 			'padding_4_phone' => array(
 				'type' => 'skip',
 			),
+			'padding_1_last_edited' => array(
+				'type' => 'skip',
+			),
+			'padding_2_last_edited' => array(
+				'type' => 'skip',
+			),
+			'padding_3_last_edited' => array(
+				'type' => 'skip',
+			),
+			'padding_4_last_edited' => array(
+				'type' => 'skip',
+			),
 			'module_id_1' => array(
 				'type' => 'skip',
 			),
@@ -1555,6 +1562,10 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 				'option_category' => 'configuration',
 				'tab_slug'        => 'custom_css',
 			),
+			'custom_padding_last_edited' => array(
+				'type'     => 'skip',
+				'tab_slug' => 'advanced',
+			),
 			'__video_background' => array(
 				'type' => 'computed',
 				'computed_callback' => array( 'ET_Builder_Row', 'get_video_background' ),
@@ -1566,13 +1577,6 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 				),
 			),
 		);
-
-		if ( et_fb_is_enabled() || et_fb_is_retrieving_builder_data() ) {
-			$fields["custom_padding_last_edited"] = array(
-				'type'     => 'skip',
-				'tab_slug' => 'advanced',
-			);
-		}
 
 		return $fields;
 	}
@@ -1612,7 +1616,7 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 		$custom_padding          = $this->shortcode_atts['custom_padding'];
 		$custom_padding_tablet   = $this->shortcode_atts['custom_padding_tablet'];
 		$custom_padding_phone    = $this->shortcode_atts['custom_padding_phone'];
-		$padding_mobile          = $this->shortcode_atts['padding_mobile'];
+		$custom_padding_last_edited = $this->shortcode_atts['custom_padding_last_edited'];
 		$column_padding_mobile   = $this->shortcode_atts['column_padding_mobile'];
 		$make_fullwidth          = $this->shortcode_atts['make_fullwidth'];
 		$make_equal              = $this->shortcode_atts['make_equal'];
@@ -1657,6 +1661,11 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 		$padding_2_phone         = $this->shortcode_atts['padding_2_phone'];
 		$padding_3_phone         = $this->shortcode_atts['padding_3_phone'];
 		$padding_4_phone         = $this->shortcode_atts['padding_4_phone'];
+		$padding_1_last_edited   = $this->shortcode_atts['padding_1_last_edited'];
+		$padding_2_last_edited   = $this->shortcode_atts['padding_2_last_edited'];
+		$padding_3_last_edited   = $this->shortcode_atts['padding_3_last_edited'];
+		$padding_4_last_edited   = $this->shortcode_atts['padding_4_last_edited'];
+		$padding_mobile          = $this->shortcode_atts['padding_mobile'];
 		$gutter_width            = $this->shortcode_atts['gutter_width'];
 		$use_custom_width        = $this->shortcode_atts['use_custom_width'];
 		$custom_width_px         = $this->shortcode_atts['custom_width_px'];
@@ -1709,9 +1718,14 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 			}
 		}
 
-		$padding_mobile_values = array(
+		$custom_padding_responsive_active = et_pb_get_responsive_status( $custom_padding_last_edited );
+
+		$padding_mobile_values = $custom_padding_responsive_active ? array(
 			'tablet' => explode( '|', $custom_padding_tablet ),
 			'phone'  => explode( '|', $custom_padding_phone ),
+		) : array(
+			'tablet' => false,
+			'phone' => false,
 		);
 
 		$et_pb_columns_counter = 0;
@@ -1752,18 +1766,22 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 			array(
 				'tablet' => explode( '|', $padding_1_tablet ),
 				'phone'  => explode( '|', $padding_1_phone ),
+				'last_edited' => $padding_1_last_edited,
 			),
 			array(
 				'tablet' => explode( '|', $padding_2_tablet ),
 				'phone'  => explode( '|', $padding_2_phone ),
+				'last_edited' => $padding_2_last_edited,
 			),
 			array(
 				'tablet' => explode( '|', $padding_3_tablet ),
 				'phone'  => explode( '|', $padding_3_phone ),
+				'last_edited' => $padding_3_last_edited,
 			),
 			array(
 				'tablet' => explode( '|', $padding_4_tablet ),
 				'phone'  => explode( '|', $padding_4_phone ),
+				'last_edited' => $padding_4_last_edited,
 			),
 		);
 
@@ -1843,7 +1861,10 @@ class ET_Builder_Row extends ET_Builder_Structure_Element {
 						),
 					);
 
-					if ( 'on' !== $padding_mobile ) {
+					// Backward compatibility. Keep Padding on Mobile is deprecated in favour of responsive inputs mechanism for custom padding
+					// To ensure that it is compatibility with previous version of Divi, this option is now only used as last resort if no
+					// responsive padding value is found,  and padding_mobile value is saved (which is set to off by default)
+					if ( in_array( $padding_mobile, array( 'on', 'off' ) ) && 'on' !== $padding_mobile && ! $custom_padding_responsive_active ) {
 						$element_style['media_query'] = ET_Builder_Element::get_media_query( 'min_width_981' );
 					}
 
@@ -1991,6 +2012,7 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 			'custom_padding',
 			'custom_padding_tablet',
 			'custom_padding_phone',
+			'custom_padding_last_edited',
 			'padding_mobile',
 			'column_padding_mobile',
 			'use_custom_gutter',
@@ -2023,6 +2045,9 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 			'padding_1_phone',
 			'padding_2_phone',
 			'padding_3_phone',
+			'padding_1_last_edited',
+			'padding_2_last_edited',
+			'padding_3_last_edited',
 			'parallax_1',
 			'parallax_method_1',
 			'parallax_2',
@@ -2048,8 +2073,8 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 		);
 
 		$this->fields_defaults = array(
-			'padding_mobile'        => array( 'off' ),
-			'column_padding_mobile' => array( 'off' ),
+			'padding_mobile'        => array( '' ),
+			'column_padding_mobile' => array( '' ),
 			'use_custom_gutter'     => array( 'off' ),
 			'gutter_width'          => array( '' ),
 			'make_equal'            => array( 'off' ),
@@ -2099,13 +2124,7 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 			),
 			'padding_mobile' => array(
 				'label'             => esc_html__( 'Keep Custom Padding on Mobile', 'et_builder' ),
-				'type'              => 'yes_no_button',
-				'option_category'   => 'layout',
-				'options'           => array(
-					'off' => esc_html__( 'No', 'et_builder' ),
-					'on'  => esc_html__( 'Yes', 'et_builder' ),
-				),
-				'description'       => esc_html__( 'Allow custom padding to be retained on mobile screens', 'et_builder' ),
+				'type'              => 'skip', // Remaining attribute for backward compatibility
 			),
 			'use_custom_gutter' => array(
 				'label'             => esc_html__( 'Use Custom Gutter Width', 'et_builder' ),
@@ -2150,12 +2169,7 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 			),
 			'column_padding_mobile' => array(
 				'label'             => esc_html__( 'Keep Column Padding on Mobile', 'et_builder' ),
-				'type'              => 'yes_no_button',
-				'option_category'   => 'layout',
-				'options'           => array(
-					'on'  => esc_html__( 'Yes', 'et_builder' ),
-					'off' => esc_html__( 'No', 'et_builder' ),
-				),
+				'type'              => 'skip', // Remaining attribute for backward compatibility
 			),
 			'background_color_1' => array(
 				'type' => 'skip',
@@ -2247,6 +2261,15 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 			'padding_3_phone' => array(
 				'type' => 'skip',
 			),
+			'padding_1_last_edited' => array(
+				'type' => 'skip',
+			),
+			'padding_2_last_edited' => array(
+				'type' => 'skip',
+			),
+			'padding_3_last_edited' => array(
+				'type' => 'skip',
+			),
 			'module_id_1' => array(
 				'type' => 'skip',
 			),
@@ -2329,19 +2352,16 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 				'tab_slug'        => 'custom_css',
 				'option_class'    => 'et_pb_custom_css_regular',
 			),
+			'custom_padding_last_edited' => array(
+				'type'     => 'skip',
+				'tab_slug' => 'advanced',
+			),
 			'columns_css_fields' => array(
 				'type'            => 'column_settings_css_fields',
 				'option_category' => 'configuration',
 				'tab_slug'        => 'custom_css',
 			),
 		);
-
-		if ( et_fb_is_enabled() || et_fb_is_retrieving_builder_data() ) {
-			$fields["custom_padding_last_edited"] = array(
-				'type'     => 'skip',
-				'tab_slug' => 'advanced',
-			);
-		}
 
 		return $fields;
 	}
@@ -2373,12 +2393,16 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 		$padding_1_phone         = $this->shortcode_atts['padding_1_phone'];
 		$padding_2_phone         = $this->shortcode_atts['padding_2_phone'];
 		$padding_3_phone         = $this->shortcode_atts['padding_3_phone'];
+		$padding_1_last_edited   = $this->shortcode_atts['padding_1_last_edited'];
+		$padding_2_last_edited   = $this->shortcode_atts['padding_2_last_edited'];
+		$padding_3_last_edited   = $this->shortcode_atts['padding_3_last_edited'];
 		$gutter_width            = $this->shortcode_atts['gutter_width'];
 		$make_equal              = $this->shortcode_atts['make_equal'];
 		$custom_padding          = $this->shortcode_atts['custom_padding'];
+		$padding_mobile          = $this->shortcode_atts['padding_mobile'];
 		$custom_padding_tablet   = $this->shortcode_atts['custom_padding_tablet'];
 		$custom_padding_phone    = $this->shortcode_atts['custom_padding_phone'];
-		$padding_mobile          = $this->shortcode_atts['padding_mobile'];
+		$custom_padding_last_edited = $this->shortcode_atts['custom_padding_last_edited'];
 		$column_padding_mobile   = $this->shortcode_atts['column_padding_mobile'];
 		$global_module           = $this->shortcode_atts['global_module'];
 		$use_custom_gutter       = $this->shortcode_atts['use_custom_gutter'];
@@ -2420,9 +2444,14 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 			}
 		}
 
-		$padding_mobile_values = array(
+		$custom_padding_responsive_active = et_pb_get_responsive_status( $custom_padding_last_edited );
+
+		$padding_mobile_values = $custom_padding_responsive_active ? array(
 			'tablet' => explode( '|', $custom_padding_tablet ),
 			'phone'  => explode( '|', $custom_padding_phone ),
+		) : array(
+			'tablet' => false,
+			'phone' => false,
 		);
 
 		$et_pb_columns_inner_counter = 0;
@@ -2462,14 +2491,17 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 			array(
 				'tablet' => explode( '|', $padding_1_tablet ),
 				'phone'  => explode( '|', $padding_1_phone ),
+				'last_edited' => $padding_1_last_edited,
 			),
 			array(
 				'tablet' => explode( '|', $padding_2_tablet ),
 				'phone'  => explode( '|', $padding_2_phone ),
+				'last_edited' => $padding_2_last_edited,
 			),
 			array(
 				'tablet' => explode( '|', $padding_3_tablet ),
 				'phone'  => explode( '|', $padding_3_phone ),
+				'last_edited' => $padding_3_last_edited,
 			),
 		);
 
@@ -2502,7 +2534,10 @@ class ET_Builder_Row_Inner extends ET_Builder_Structure_Element {
 						),
 					);
 
-					if ( 'on' !== $padding_mobile ) {
+					// Backward compatibility. Keep Padding on Mobile is deprecated in favour of responsive inputs mechanism for custom padding
+					// To ensure that it is compatibility with previous version of Divi, this option is now only used as last resort if no
+					// responsive padding value is found,  and padding_mobile value is saved (which is set to off by default)
+					if ( in_array( $padding_mobile, array( 'on', 'off' ) ) && 'on' !== $padding_mobile && ! $custom_padding_responsive_active ) {
 						$element_style['media_query'] = ET_Builder_Element::get_media_query( 'min_width_981' );
 					}
 
@@ -2627,7 +2662,11 @@ class ET_Builder_Column extends ET_Builder_Structure_Element {
 		$specialty_columns           = $this->shortcode_atts['specialty_columns'];
 		$saved_specialty_column_type = $this->shortcode_atts['saved_specialty_column_type'];
 
-		global $et_pb_all_column_settings, $et_pb_all_column_settings_inner, $et_specialty_column_type, $et_pb_rendering_column_content, $et_pb_rendering_column_content_row;
+		global $et_pb_all_column_settings,
+			$et_pb_all_column_settings_inner,
+			$et_specialty_column_type,
+			$et_pb_rendering_column_content,
+			$et_pb_rendering_column_content_row;
 
 		$is_specialty_column = 'et_pb_column_inner' !== $function_name && '' !== $specialty_columns;
 
@@ -2660,6 +2699,8 @@ class ET_Builder_Column extends ET_Builder_Structure_Element {
 		$background_img = isset( $backgrounds_array[$array_index][1] ) ? $backgrounds_array[$array_index][1] : '';
 		$padding_values = isset( $paddings_array[$array_index] ) ? $paddings_array[$array_index] : array();
 		$padding_mobile_values = isset( $paddings_mobile_array[$array_index] ) ? $paddings_mobile_array[$array_index] : array();
+		$padding_last_edited = isset( $padding_mobile_values['last_edited'] ) ? $padding_mobile_values['last_edited'] : 'off|desktop';
+		$padding_responsive_active = et_pb_get_responsive_status( $padding_last_edited );
 		$parallax_method = isset( $column_parallax[$array_index][0] ) && 'on' === $column_parallax[$array_index][0] ? $column_parallax[$array_index][1] : '';
 		$custom_css_class = isset( $column_css_array['css_class'][$array_index] ) ? ' ' . $column_css_array['css_class'][$array_index] : '';
 		$custom_css_id = isset( $column_css_array['css_id'][$array_index] ) ? $column_css_array['css_id'][$array_index] : '';
@@ -2699,7 +2740,10 @@ class ET_Builder_Column extends ET_Builder_Structure_Element {
 						),
 					);
 
-					if ( 'on' !== $keep_column_padding_mobile ) {
+					// Backward compatibility. Keep Padding on Mobile is deprecated in favour of responsive inputs mechanism for custom padding
+					// To ensure that it is compatibility with previous version of Divi, this option is now only used as last resort if no
+					// responsive padding value is found,  and padding_mobile value is saved (which is set to off by default)
+					if ( in_array( $keep_column_padding_mobile, array( 'on', 'off' ) ) && 'on' !== $keep_column_padding_mobile && ! $padding_responsive_active ) {
 						$element_style['media_query'] = ET_Builder_Element::get_media_query( 'min_width_981' );
 					}
 
@@ -2708,7 +2752,7 @@ class ET_Builder_Column extends ET_Builder_Structure_Element {
 			}
 		}
 
-		if ( ! empty( $padding_mobile_values['tablet'] ) || ! empty( $padding_values['phone'] ) ) {
+		if ( $padding_responsive_active && ( ! empty( $padding_mobile_values['tablet'] ) || ! empty( $padding_values['phone'] ) ) ) {
 			$padding_mobile_values_processed = array();
 
 			foreach( array( 'tablet', 'phone' ) as $device ) {
@@ -2725,7 +2769,8 @@ class ET_Builder_Column extends ET_Builder_Structure_Element {
 			}
 
 			if ( ! empty( $padding_mobile_values_processed ) ) {
-				et_pb_generate_responsive_css( $padding_mobile_values_processed, '.et_pb_row > .et_pb_column%%order_class%%', '', $function_name );
+				$padding_mobile_selector = 'et_pb_column_inner' !== $function_name ? '.et_pb_row > .et_pb_column%%order_class%%' : '.et_pb_row_inner > .et_pb_column%%order_class%%';
+				et_pb_generate_responsive_css( $padding_mobile_values_processed, $padding_mobile_selector, '', $function_name );
 			}
 		}
 

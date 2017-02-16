@@ -78,10 +78,6 @@
 		RewriteCond %{QUERY_STRING} %[A-F][0-9A-F] [NC]
 		RewriteRule ^.* - [F]
 	</IfModule>
-
-	# Enable the hide backend feature - Security > Settings > Hide Login Area > Hide Backend
-	RewriteRule ^(/)?barnowl/?$ /wp-login.php [QSA,L]
-	RewriteRule ^(/)?register/?$ /wplogin?action=register [QSA,L]
 # END iThemes Security - Do not modify or remove this line
 
 # BEGIN s2Member GZIP exclusions

@@ -91,7 +91,7 @@ function et_fb_known_shortcode_wrappers() {
 }
 
 function et_fb_backend_helpers() {
-	global $post, $paged;
+	global $post, $paged, $wp_query;
 
 	$layout_type = '';
 
@@ -296,6 +296,14 @@ function et_fb_backend_helpers() {
 			),
 		),
 		'knownShortcodeWrappers'           => et_fb_known_shortcode_wrappers(),
+		'customizer'                   => array(
+			'tablet' => array(
+				'sectionHeight' => et_get_option( 'tablet_section_height' ),
+			),
+			'phone' => array(
+				'sectionHeight' => et_get_option( 'phone_section_height' ),
+			),
+		),
 	);
 
 	// Internationalization.
@@ -344,6 +352,9 @@ function et_fb_backend_helpers() {
 			'fullwidthPostSlider' => array(
 				'by' => esc_html( 'by ', 'et_builder' ),
 			),
+			'socialFollow' => array(
+				'follow' => esc_html( 'Follow', 'et_builder' ),
+			),
 		),
 		'saveButtonText'               => esc_attr__( 'Save', 'et_builder' ),
 		'saveDraftButtonText'          => esc_attr__( 'Save Draft', 'et_builder' ),
@@ -371,6 +382,7 @@ function et_fb_backend_helpers() {
 			),
 			'colorpicker'              => array(
 				'clear'                => esc_html__( 'Clear', 'et_builder' ),
+				'select'               => esc_html__( 'Select', 'et_builder' ),
 			),
 			'uploadGallery'            => array(
 				'uploadButtonText'     => esc_html__( 'Update Gallery', 'et_builder'),

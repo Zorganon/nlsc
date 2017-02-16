@@ -2,7 +2,7 @@ var ET_PageBuilder = ET_PageBuilder || {};
 
 window.wp = window.wp || {};
 
-window.et_builder_version = '3.0.23';
+window.et_builder_version = '3.0.34';
 
 ( function($) {
 	var et_error_modal_shown = window.et_error_modal_shown,
@@ -2637,8 +2637,13 @@ window.et_builder_version = '3.0.23';
 				});
 			},
 
+			getAttr: function( object, name ) {
+				return _.isUndefined( object[ name ] ) ? '' : object[ name ];
+			},
+
 			performSaving : function( option_tabs_selector ) {
-				var attributes = {},
+				var thisClass  = this,
+					attributes = {},
 					defaults   = {},
 					options_selector = typeof option_tabs_selector !== 'undefined' && '' !== option_tabs_selector ? option_tabs_selector : 'input, select, textarea, #et_pb_content_main';
 
@@ -2714,8 +2719,8 @@ window.et_builder_version = '3.0.23';
 
 						custom_css_option_value = $this_el.val();
 
-						// replace new lines with || in Custom CSS settings
-						setting_value = '' !== custom_css_option_value ? custom_css_option_value.replace( /(?:\r\n|\r|\n)/g, '\|\|' ) : '';
+						// replace new lines with || and backlash \ with %92 in Custom CSS settings
+						setting_value = '' !== custom_css_option_value ? custom_css_option_value.replace( /(?:\r\n|\r|\n)/g, '\|\|' ).replace( /\\/g, '%92' ) : '';
 					} else if ( $this_el.hasClass( 'et-pb-range-input' ) || $this_el.hasClass( 'et-pb-validate-unit' ) ) {
 						// Process range sliders. Sanitize for valid unit first
 						var et_validate_default_unit = $this_el.hasClass( 'et-pb-range-input' ) ? 'no_default_unit' : '';
@@ -2743,6 +2748,50 @@ window.et_builder_version = '3.0.23';
 
 				// add defaults object
 				attributes['module_defaults'] = defaults;
+
+				// remove padding_mobile based on last_edited value to remove dependency to padding_mobile and rely on responsive padding
+				var module_attributes = this.model.attributes,
+					module_previous_attributes = this.model._previousAttributes,
+					module_type = module_attributes.type,
+					custom_padding_last_edited = _.isUndefined(attributes.et_pb_custom_padding_last_edited) ? [] : attributes.et_pb_custom_padding_last_edited.split('|'),
+					responsive_padding_active = typeof custom_padding_last_edited === 'object' && custom_padding_last_edited[0] === 'on',
+					is_custom_padding_updated = thisClass.getAttr( attributes, 'et_pb_custom_padding' ) !== thisClass.getAttr( module_previous_attributes, 'et_pb_custom_padding' ),
+					is_custom_padding_tablet_updated = responsive_padding_active && thisClass.getAttr( attributes, 'et_pb_custom_padding_tablet' ) !== thisClass.getAttr( module_previous_attributes, 'et_pb_custom_padding_tablet' ),
+					is_custom_padding_phone_updated = responsive_padding_active && thisClass.getAttr( attributes, 'et_pb_custom_padding_phone' ) !== thisClass.getAttr( module_previous_attributes, 'et_pb_custom_padding_phone' ),
+					is_custom_padding_field_updated = is_custom_padding_updated || is_custom_padding_tablet_updated || is_custom_padding_phone_updated;
+
+				// remove padding_mobile on section if responsive padding is active
+				if ( module_type === 'section' && ( responsive_padding_active || is_custom_padding_field_updated ) ) {
+					attributes.et_pb_padding_mobile = '';
+				}
+
+				if ( module_type === 'row' || module_type === 'row_inner' ) {
+					// remove padding_mobile on row if responsive padding is active
+					if ( ( responsive_padding_active || is_custom_padding_field_updated ) ) {
+						attributes.et_pb_padding_mobile = '';
+					}
+
+					// remove column_padding
+					var column_count = typeof module_attributes.columns_layout === 'undefined' ? 0 : module_attributes.columns_layout.split(',').length;
+					for (var column_index = 1; column_index <= column_count; column_index++) {
+						var column_padding_last_edited_value = attributes['et_pb_padding_' + column_index + '_last_edited'],
+							column_padding_last_edited = typeof column_padding_last_edited_value === 'undefined' ? [] : column_padding_last_edited_value.split('|'),
+							column_responsive_padding_active = typeof column_padding_last_edited === 'object' && column_padding_last_edited[0] === 'on',
+							is_column_padding_top_updated    = thisClass.getAttr( attributes, 'et_pb_padding_top_' + column_index ) !== thisClass.getAttr( module_previous_attributes, 'et_pb_padding_top_' + column_index ),
+							is_column_padding_right_updated  = thisClass.getAttr( attributes, 'et_pb_padding_right_' + column_index ) !== thisClass.getAttr( module_previous_attributes, 'et_pb_padding_right_' + column_index ),
+							is_column_padding_bottom_updated = thisClass.getAttr( attributes, 'et_pb_padding_bottom_' + column_index ) !== thisClass.getAttr( module_previous_attributes, 'et_pb_padding_bottom_' + column_index ),
+							is_column_padding_left_updated   = thisClass.getAttr( attributes, 'et_pb_padding_left_' + column_index ) !== thisClass.getAttr( module_previous_attributes, 'et_pb_padding_left_' + column_index ),
+							is_column_padding_updated        = is_column_padding_top_updated || is_column_padding_right_updated || is_column_padding_bottom_updated || is_column_padding_left_updated,
+							is_column_padding_tablet_updated = column_responsive_padding_active && thisClass.getAttr( attributes, 'et_pb_padding_' + column_index + '_tablet' ) !== thisClass.getAttr( module_previous_attributes, 'et_pb_padding_' + column_index + '_tablet' ),
+							is_column_padding_phone_updated  = column_responsive_padding_active && thisClass.getAttr( attributes, 'et_pb_padding_' + column_index + '_phone' ) !== thisClass.getAttr( module_previous_attributes, 'et_pb_padding_' + column_index + '_phone'),
+							is_column_padding_field_updated  = is_column_padding_updated || is_column_padding_tablet_updated || is_column_padding_phone_updated;
+
+						if ( column_responsive_padding_active || is_column_padding_field_updated ) {
+							attributes.et_pb_column_padding_mobile = '';
+							break;
+						}
+					}
+				}
 
 				// set model attributes
 				this.model.set( attributes );
@@ -6932,6 +6981,8 @@ window.et_builder_version = '3.0.23';
 					if ( ! found_inner_shortcodes ) {
 						if ( $.inArray( shortcode_name, et_pb_raw_shortcodes ) > -1 ) {
 							module_settings['et_pb_raw_content'] = _.unescape( shortcode_content );
+							// replace line-break placeholders with real line-breaks
+							module_settings['et_pb_raw_content'] = module_settings['et_pb_raw_content'].replace( /<!-- \[et_pb_line_break_holder\] -->/g, '\n' );
 						} else {
 							module_settings['et_pb_content_new'] = shortcode_content;
 						}
@@ -7418,6 +7469,8 @@ window.et_builder_version = '3.0.23';
 								content = setting_value;
 
 								if ( setting_name === 'et_pb_raw_content' ) {
+									// replace the line-breaks with placeholders, so they won't be removed/replaced by WP
+									content = content.replace( /\r?\n|\r/g, '<!-- [et_pb_line_break_holder] -->' );
 									content = _.escape( content );
 								}
 
@@ -7444,7 +7497,7 @@ window.et_builder_version = '3.0.23';
 
 								// Make sure double quotes are encoded, before adding values to shortcode
 								if ( typeof setting_value === 'string' ) {
-									setting_value = setting_value.replace( /\"/g, '%22' );
+									setting_value = setting_value.replace( /\"/g, '%22' ).replace( /\\/g, '%92' );
 								}
 
 								attributes += ' ' + setting_name + '="' + setting_value + '"';
@@ -7856,6 +7909,10 @@ window.et_builder_version = '3.0.23';
 
 			et_pb_close_all_right_click_options();
 		});
+
+		function et_pb_is_builder_used() {
+			return $('#et_pb_use_builder').val() === 'on';
+		}
 
 		function et_pb_activate_upload( $upload_button ) {
 			$upload_button.click( function( event ) {
@@ -9730,6 +9787,7 @@ window.et_builder_version = '3.0.23';
 				var current_view = ET_PageBuilder_Layout.getView( cid_or_element.model.get( 'cid' ) ),
 					parent_view = typeof current_view.model.get( 'parent' ) !== 'undefined' ? ET_PageBuilder_Layout.getView( current_view.model.get( 'parent' ) ) : '',
 					$global_children = current_view.$el.find( '.et_pb_global' ),
+					is_global = current_view.$el.is( '.et_pb_global' ),
 					has_global = $global_children.length ? 'has_global' : 'no_globals';
 
 				modal_attributes.is_global = typeof current_view.model.get( 'et_pb_global_module' ) !== 'undefined' && '' !== current_view.model.get( 'et_pb_global_module' ) ? 'global' : 'regular';
@@ -9888,6 +9946,13 @@ window.et_builder_version = '3.0.23';
 
 									$colorpalette_colorpicker.wpColorPicker( 'color', colorpalette_colorpicker_color )
 								})
+
+								$colorpalette_colorpicker.closest( '.wp-picker-container' ).find( '.wp-color-result' ).attr( 'title', et_pb_options.select_text );
+
+								$colorpalette_colorpicker.closest( '.wp-picker-container' ).on( 'click', '.wp-color-result', function( event ) {
+									// Hide active colorpalette colorpicker when "Select" button clicked
+									$palette_wrapper.find( '.colorpalette-colorpicker' ).removeClass( 'active' );
+								});
 
 								colorpalette_colorpicker_index++;
 							});
@@ -10080,6 +10145,8 @@ window.et_builder_version = '3.0.23';
 								et_post_type : et_pb_options.post_type
 							},
 							success: function( data ) {
+								// update the list of saved layouts after new one was added
+								et_load_saved_layouts( 'not_predefined', '', '', et_pb_options.post_type, true );
 							}
 						} );
 
@@ -10096,7 +10163,7 @@ window.et_builder_version = '3.0.23';
 							selected_tabs                = '',
 							selected_cats                = '',
 							new_cat                      = $prompt_modal.find( '#et_pb_new_cat_name' ).val(),
-							ignore_global                = typeof has_global !== 'undefined' && 'has_global' === has_global && 'global' === layout_scope ? 'ignore_global' : 'include_global',
+							ignore_global                = is_global || ( typeof has_global !== 'undefined' && 'has_global' === has_global && 'global' === layout_scope ) ? 'ignore_global' : 'include_global',
 							ignore_saved_tabs            = 'ignore_global' === ignore_global ? 'ignore_global_tabs' : '',
 							$modal_settings_container    = $( '.et_pb_modal_settings_container' ),
 							$modal_overlay               = $( '.et_pb_modal_overlay' );
@@ -10253,6 +10320,9 @@ window.et_builder_version = '3.0.23';
 										$( 'body' ).find( '.et_pb_global_loading_overlay' ).remove();
 									}, 650 );
 								}
+
+								// clear the library cache to update the library modules list
+								$et_pb_templates_cache = {};
 							}
 						} );
 						break;
@@ -11079,6 +11149,7 @@ window.et_builder_version = '3.0.23';
 
 				$this_el.addClass( hidden_class );
 				$color_picker_container.removeClass( hidden_class );
+				$color_picker_container.find( '.wp-color-result' ).click();
 
 				$hidden_color_input.val( $color_picker.wpColorPicker( 'color' ) );
 
@@ -11469,7 +11540,7 @@ window.et_builder_version = '3.0.23';
 						new_field_value     = $this_field.val(),
 						new_field_value_number = parseInt( new_field_value ),
 						data_affects_obj    = _.map( $this_field.data( 'affects' ).split(', '), function( affect ) {
-							var is_selector = $( affect ).length;
+							var is_selector = ( 'image' !== affect ) && $( affect ).length;
 
 							return is_selector ? affect : '#et_pb_' + affect;
 						} ),
@@ -11506,7 +11577,13 @@ window.et_builder_version = '3.0.23';
 
 						// if the affected field affects other fields, find out if we need to hide/show them
 						if ( $dependant_fields.length ) {
-							var $inner_affected_elements = $( $dependant_fields.data( 'affects' ) );
+								var data_inner_affects_obj = _.map( $dependant_fields.data( 'affects' ).split(', '), function( affect ) {
+									var is_selector = ( 'image' !== affect ) && $( affect ).length;
+
+									return is_selector ? affect : '#et_pb_' + affect;
+								} );
+								var data_inner_affects = data_inner_affects_obj.join(', ');
+								var $inner_affected_elements = $( data_inner_affects );
 
 							if ( ! $affected_container.is( ':visible' ) ) {
 								// if the main affected field is hidden, hide all fields it affects
@@ -11781,6 +11858,7 @@ window.et_builder_version = '3.0.23';
 		function et_pb_setup_font_setting( $element, reset ) {
 			var $this_el           = $element,
 				$container         = $this_el.parent('.et-pb-option-container'),
+				$options_container = $this_el.closest( '.et-pb-options-tab' ),
 				$main_option       = $container.find( 'input.et-pb-font-select' ),
 				$select_option     = $container.find( 'select.et-pb-font-select' ),
 				$style_options     = $container.find( '.et_builder_font_styles' ),
@@ -11790,6 +11868,9 @@ window.et_builder_version = '3.0.23';
 				$underline_option  = $style_options.find( '.et_builder_underline_font' ),
 				style_active_class = 'et_font_style_active',
 				font_value         = $.trim( $main_option.val() ),
+				all_caps_option    = typeof $main_option.data( 'all-caps-ref' ) !== 'undefined' && '' !== $main_option.data( 'all-caps-ref' ) ? $main_option.data( 'all-caps-ref' ) : '',
+				$all_caps_el       = '' !== all_caps_option ? $options_container.find( '.et-pb-option-' + all_caps_option ) : '',
+				$all_caps_input    = '' !== $all_caps_el && $all_caps_el.length ? $all_caps_el.find( 'input' ) : '',
 				font_values;
 
 			if ( reset ) {
@@ -11834,6 +11915,20 @@ window.et_builder_version = '3.0.23';
 				$italic_option.removeClass( style_active_class );
 				$uppercase_option.removeClass( style_active_class );
 				$underline_option.removeClass( style_active_class );
+			}
+
+			// backward compatibility for obsolete "all caps" option
+			if ( $all_caps_input.length && '' !== $all_caps_input.val() ) {
+				// turn on uppercase option if it's off, but "All Caps" is on
+				if ( font_values[3] !== 'on' && 'on' === $all_caps_input.val() ) {
+					$uppercase_option.addClass( style_active_class );
+					font_values[3] = 'on';
+					// update the value of font option if Uppercase value was changed
+					$main_option.val( font_values.join( '|' ) ).trigger( 'change' );
+				}
+
+				// reset the value for obsolete "all caps" option to remove it from shortcode
+				$all_caps_input.val( '' );
 			}
 		}
 
@@ -11984,8 +12079,8 @@ window.et_builder_version = '3.0.23';
 		}
 
 		// function to load saved layouts, it works differently than loading saved rows, sections and modules, so we need a separate function
-		function et_load_saved_layouts( layout_type, container_class, $this_el, post_type ) {
-			if ( typeof $et_pb_templates_cache[layout_type + '_layouts'] !== 'undefined' ) {
+		function et_load_saved_layouts( layout_type, container_class, $this_el, post_type, update_cache ) {
+			if ( typeof $et_pb_templates_cache[layout_type + '_layouts'] !== 'undefined' && ! update_cache ) {
 				$this_el.find( '.et-pb-main-settings.' + container_class ).append( $et_pb_templates_cache[layout_type + '_layouts'] );
 			} else {
 				$.ajax( {
@@ -11999,13 +12094,19 @@ window.et_builder_version = '3.0.23';
 						et_load_layouts_type : layout_type //'predefined' or not predefined
 					},
 					beforeSend : function() {
-						ET_PageBuilder_Events.trigger( 'et-pb-loading:started' );
+						if ( ! update_cache ) {
+							ET_PageBuilder_Events.trigger( 'et-pb-loading:started' );
+						}
 					},
 					complete : function() {
-						ET_PageBuilder_Events.trigger( 'et-pb-loading:ended' );
+						if ( ! update_cache ) {
+							ET_PageBuilder_Events.trigger( 'et-pb-loading:ended' );
+						}
 					},
 					success: function( data ){
-						$this_el.find( '.et-pb-main-settings.' + container_class ).append( data );
+						if ( ! update_cache ) {
+							$this_el.find( '.et-pb-main-settings.' + container_class ).append( data );
+						}
 						$et_pb_templates_cache[layout_type + '_layouts'] = data;
 					}
 				} );
@@ -12366,6 +12467,10 @@ window.et_builder_version = '3.0.23';
 		* Builder hotkeys
 		*/
 		$(window).keydown( function( event ){
+			if ( ! et_pb_is_builder_used() ) {
+				return;
+			}
+
 			function et_pb_close_opened_modal() {
 				var $close_button = $( '.et-pb-modal-close' );
 				var $core_close_button = $('.et-core-modal-close');
@@ -12802,6 +12907,8 @@ window.et_builder_version = '3.0.23';
 				if (isHelpModal) {
 					return;
 				}
+
+				et_pb_close_opened_modal();
 
 				view = new ET_PageBuilder.ModalView( {
 					attributes : {

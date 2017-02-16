@@ -279,7 +279,7 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 															// get the custom css value from WP custom CSS option if supported
 															if ( ( $shortname . '_custom_css' ) === $value['id'] && function_exists( 'wp_get_custom_css') ) {
 																$et_textarea_value = wp_get_custom_css();
-																$et_textarea_value = stripslashes( $et_textarea_value );
+																$et_textarea_value = strip_tags( $et_textarea_value );
 															} else {
 																$et_textarea_value = '';
 																$et_textarea_value = ( '' != et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) ) ? et_get_option( $value['id'], '', '', false, $is_new_global_setting, $global_setting_main_name, $global_setting_sub_name ) : $value['std'];
@@ -530,9 +530,9 @@ if ( ! function_exists( 'et_build_epanel' ) ) {
 		<script type="text/template" id="epanel-yes-no-button-template">
 		<div class="et_pb_yes_no_button_wrapper">
 			<div class="et_pb_yes_no_button"><!-- .et_pb_on_state || .et_pb_off_state -->
-				<span class="et_pb_value_text et_pb_on_value"><?php esc_html_e( 'Enable', $themename ); ?></span>
+				<span class="et_pb_value_text et_pb_on_value"><?php esc_html_e( 'Enabled', $themename ); ?></span>
 				<span class="et_pb_button_slider"></span>
-				<span class="et_pb_value_text et_pb_off_value"><?php esc_html_e( 'Disable', $themename ); ?></span>
+				<span class="et_pb_value_text et_pb_off_value"><?php esc_html_e( 'Disabled', $themename ); ?></span>
 			</div>
 		</div>
 		</script>

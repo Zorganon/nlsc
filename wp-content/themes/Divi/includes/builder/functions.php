@@ -2,7 +2,7 @@
 
 if ( ! defined( 'ET_BUILDER_PRODUCT_VERSION' ) ) {
 	// Note, when this is updated, you must also update corresponding version in builder.js: `window.et_builder_version`
-	define( 'ET_BUILDER_PRODUCT_VERSION', '3.0.23' );
+	define( 'ET_BUILDER_PRODUCT_VERSION', '3.0.34' );
 }
 
 if ( ! defined( 'ET_BUILDER_VERSION' ) ) {
@@ -731,8 +731,12 @@ function et_fb_process_to_shortcode( $object, $options = array(), $library_item_
 				// Make sure double quotes are encoded, before adding values to shortcode
 				$value = str_ireplace('"', '%22', $value);
 
-				// do not escape $value here - it breaks special characters. It was sanitized already
-				$attributes .= ' ' . esc_attr( $attribute ) . '="' . $value . '"';
+				// Encode backslash for custom CSS-related attributes
+				if ( 0 === strpos( $attribute, 'custom_css_' ) ) {
+					$value = str_ireplace('\\', '%92', $value);
+				}
+
+				$attributes .= ' ' . esc_attr( $attribute ) . '="' . et_esc_previously( $value ) . '"';
 			}
 		}
 
@@ -751,8 +755,10 @@ function et_fb_process_to_shortcode( $object, $options = array(), $library_item_
 
 		// if applicable, add inner content and close tag
 		if ( ! $open_tag_only ) {
-
-			if ( isset( $item['content'] ) && is_array( $item['content'] ) ) {
+			if ( 'et_pb_section' === $type && 'on' !== $item['attrs']['fullwidth'] && 'on' !== $item['attrs']['specialty'] && ( ! isset( $item['content'] ) || ! is_array( $item['content'] ) ) ) {
+				// insert empty row if saving empty Regular section to make it work correctly in BB
+				$output .= '[et_pb_row admin_label="Row"][/et_pb_row]';
+			} else if ( isset( $item['content'] ) && is_array( $item['content'] ) ) {
 				$output .= et_fb_process_to_shortcode( $item['content'], $options );
 			} else {
 				if ( !empty( $content ) ) {
@@ -763,7 +769,8 @@ function et_fb_process_to_shortcode( $object, $options = array(), $library_item_
 
 						$_content = str_replace( '\\', '\\\\', $_content );
 
-						$output .= $_content;
+						// content of code modules should be escaped
+						$output .= in_array( $type, array( 'et_pb_code', 'et_pb_fullwidth_code' ) ) ? esc_html( $_content ) : $_content;
 					} else {
 						$output .= '';
 					}
@@ -1386,9 +1393,19 @@ function et_pb_check_oembed_provider( $url ) {
 
 if ( ! function_exists( 'et_pb_set_video_oembed_thumbnail_resolution' ) ) :
 function et_pb_set_video_oembed_thumbnail_resolution( $image_src, $resolution = 'default' ) {
-	// Replace YouTube video thumbnails to high resolution.
+	// Replace YouTube video thumbnails to high resolution if the high resolution image exists.
 	if ( 'high' === $resolution && false !== strpos( $image_src,  'hqdefault.jpg' ) ) {
-		return str_replace( 'hqdefault.jpg', 'maxresdefault.jpg', $image_src );
+		$high_res_image_src = str_replace( 'hqdefault.jpg', 'maxresdefault.jpg', $image_src );
+		$protocol = is_ssl() ? 'https://' : 'http://';
+		$processed_image_url = esc_url( str_replace( '//', $protocol, $high_res_image_src ), array('http', 'https') );
+		$response = wp_remote_get( $processed_image_url, array( 'timeout' => 30 ) );
+
+		// Youtube doesn't guarantee that high res image exists for any video, so we need to check whether it exists and fallback to default image in case of error
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return $image_src;
+		}
+
+		return $high_res_image_src;
 	}
 
 	return $image_src;
@@ -1411,7 +1428,14 @@ function et_builder_widgets_init(){
 		}
 	}
 }
-add_action( 'widgets_init', 'et_builder_widgets_init' );
+
+// call the widgets init at 'init' hook if Divi Builder plugin active
+// this is needed because plugin loads the Divi builder at 'init' hook and 'widgets_init' is too early.
+if ( et_is_builder_plugin_active() ) {
+	add_action( 'init', 'et_builder_widgets_init', 20 );
+} else {
+	add_action( 'widgets_init', 'et_builder_widgets_init' );
+}
 
 function et_builder_get_widget_areas_list() {
 	global $wp_registered_sidebars;
@@ -1719,7 +1743,7 @@ function et_pb_admin_scripts_styles( $hook ) {
 		wp_localize_script( 'et_pb_widgets_js', 'et_pb_options', apply_filters( 'et_pb_options_admin', array(
 			'ajaxurl'       => admin_url( 'admin-ajax.php' ),
 			'et_admin_load_nonce' => wp_create_nonce( 'et_admin_load_nonce' ),
-			'widget_info'   => sprintf( '<div id="et_pb_widget_area_create"><p>%1$s.</p><p>%2$s.</p><p><label>%3$s <input id="et_pb_new_widget_area_name" value="" /></label></p><p class="et_pb_widget_area_result"></p><button class="button button-primary et_pb_create_widget_area">%4$s</button></div>',
+			'widget_info'   => sprintf( '<div id="et_pb_widget_area_create"><p>%1$s.</p><p>%2$s.</p><p><label>%3$s <input id="et_pb_new_widget_area_name" value="" /></label><button class="button button-primary et_pb_create_widget_area">%4$s</button></p><p class="et_pb_widget_area_result"></p></div>',
 				esc_html__( 'Here you can create new widget areas for use in the Sidebar module', 'et_builder' ),
 				esc_html__( 'Note: Naming your widget area "sidebar 1", "sidebar 2", "sidebar 3", "sidebar 4" or "sidebar 5" will cause conflicts with this theme', 'et_builder' ),
 				esc_html__( 'Widget Name', 'et_builder' ),
@@ -1747,6 +1771,66 @@ function et_pb_admin_scripts_styles( $hook ) {
 	}
 }
 add_action( 'admin_enqueue_scripts', 'et_pb_admin_scripts_styles', 10, 1 );
+
+/**
+ * Disable emoji detection script on edit page which has Backend Builder on it.
+ * WordPress automatically replaces emoji with plain image for backward compatibility
+ * on older browsers. This causes issue when emoji is used on header or other input
+ * text field because (when the modal is saved, shortcode is generated, and emoji
+ * is being replaced with plain image) it creates incorrect attribute markup
+ * such as `title="I <img class="emoji" src="../heart.png" /> WP"` and causes
+ * the whole input text value to be disappeared
+ * @return void
+ */
+function et_pb_remove_emoji_detection_script() {
+	global $pagenow;
+
+	$disable_emoji_detection = false;
+
+	// Disable emoji detection script on editing page which has Backend Builder
+	// global $post isn't available at admin_init, so retrieve $post data manually
+	if ( 'post.php' === $pagenow && isset( $_GET['post'] ) ) {
+		$post_id   = (int) $_GET['post'];
+		$post      = get_post( $post_id );
+		$post_type = isset( $post->post_type ) ? $post->post_type : '';
+
+		if ( in_array( $post_type, et_builder_get_builder_post_types() ) ) {
+			$disable_emoji_detection = true;
+		}
+	}
+
+	// Disable emoji detection script on post new page which has Backend Builder
+	$has_post_type_query = isset( $_GET['post_type'] );
+	if ( 'post-new.php' === $pagenow && ( ! $has_post_type_query || ( $has_post_type_query && in_array( $_GET['post_type'], et_builder_get_builder_post_types() ) ) ) ) {
+		$disable_emoji_detection = true;
+	}
+
+	if ( $disable_emoji_detection ) {
+		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+	}
+}
+add_action( 'admin_init', 'et_pb_remove_emoji_detection_script' );
+
+/**
+ * Disable emoji detection script on visual builder
+ * WordPress automatically replaces emoji with plain image for backward compatibility
+ * on older browsers. This causes issue when emoji is used on header or other input
+ * text field because the staticize emoji creates HTML markup which appears to be
+ * invalid on input[type="text"] field such as `title="I <img class="emoji"
+ * src="../heart.png" /> WP"` and causes the input text value to be escaped and
+ * disappeared
+ * @return void
+ */
+function et_fb_remove_emoji_detection_script() {
+	global $post;
+
+	// Disable emoji detection script on visual builder. React's auto escaping will
+	// remove all staticized emoji when being opened on modal's input field
+	if ( isset( $post->ID ) && et_fb_is_enabled( $post->ID ) ) {
+		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+	}
+}
+add_action( 'wp', 'et_fb_remove_emoji_detection_script' );
 
 function et_pb_fix_builder_shortcodes( $content ) {
 	// if the builder is used for the page, get rid of random p tags
@@ -2106,6 +2190,7 @@ function et_pb_add_builder_page_js_css(){
 		'google_api_key'                           => et_pb_get_google_api_key(),
 		'options_page_url'                         => et_pb_get_options_page_link(),
 		'et_pb_google_maps_script_notice'          => et_pb_enqueue_google_maps_script(),
+		'select_text'                              => esc_html__( 'Select', 'et_builder' ),
 	), et_pb_history_localization() ) ) );
 
 	wp_localize_script( 'et_pb_admin_js', 'et_pb_ab_js_options', apply_filters( 'et_pb_ab_js_options', array(
@@ -4672,23 +4757,35 @@ function et_pb_update_page_settings( $post_id, $settings ) {
 			continue;
 		}
 
+		$is_default = false;
+
 		// TODO Possibly move sanitization.php to builder dir
 		// Sanitize value
 		switch ( $fields[ $setting_key ]['type'] ) {
 			case 'colorpalette':
 				$palette_colors = explode('|', $setting_value);
 				$setting_value = implode('|', array_map('et_sanitize_alpha_color', $palette_colors ) );
+
+				// set default flag if needed
+				if ( 'et_pb_color_palette' === $setting_key && $setting_value === implode( '|', et_pb_get_default_color_palette() ) ) {
+					$is_default = true;
+				}
 				break;
 
 			case 'range':
 				$setting_value = absint( $setting_value );
 				$range_min     = isset( $fields[ $setting_key ]['range_settings'] ) && isset( $fields[ $setting_key ]['range_settings']['min'] ) ?
-					absint( isset( $fields[ $setting_key ]['range_settings']['min'] ) ) : -1;
+					absint( $fields[ $setting_key ]['range_settings']['min'] ) : -1;
 				$range_max     = isset( $fields[ $setting_key ]['range_settings'] ) && isset( $fields[ $setting_key ]['range_settings']['max'] ) ?
-					absint( isset( $fields[ $setting_key ]['range_settings']['max'] ) ) : -1;
+					absint( $fields[ $setting_key ]['range_settings']['max'] ) : -1;
 
 				if ( $setting_value < $range_min || $range_max < $setting_value ) {
 					continue;
+				}
+
+				// set default flag if needed
+				if ( 'et_pb_gutter_width' === $setting_key && $setting_value === (int) et_get_option( 'gutter_width', 3 ) ) {
+					$is_default = true;
 				}
 
 				break;
@@ -4705,8 +4802,13 @@ function et_pb_update_page_settings( $post_id, $settings ) {
 		// Prepare key
 		$meta_key = "_{$setting_key}";
 
-		// Update post meta
-		update_post_meta( $post_id, $meta_key, $setting_value );
+		// remove post meta if value is default
+		if ( $is_default ) {
+			delete_post_meta( $post_id, $meta_key );
+		} else {
+			// Update post meta
+			update_post_meta( $post_id, $meta_key, $setting_value );
+		}
 	}
 }
 
@@ -5459,33 +5561,7 @@ function et_pb_display_role_editor() {
 	$all_role_options = et_pb_all_role_options();
 	$option_tabs = '';
 	$menu_tabs = '';
-
-	// get all roles registered in current WP
-	if ( ! function_exists( 'get_editable_roles' ) ) {
-		require_once( ABSPATH . '/wp-admin/includes/user.php' );
-	}
-
-	$all_roles = get_editable_roles();
-	$builder_roles_array = array();
-
-	if ( ! empty( $all_roles ) ) {
-		foreach( $all_roles as $role => $role_data ) {
-			// add roles with edit_posts capability into $builder_roles_array
-			if ( ! empty( $role_data['capabilities']['edit_posts'] ) && 1 === (int) $role_data['capabilities']['edit_posts'] ) {
-				$builder_roles_array[ $role ] = $role_data['name'];
-			}
-		}
-	}
-
-	// fill the builder roles array with default roles if it's empty
-	if ( empty( $builder_roles_array ) ) {
-		$builder_roles_array = array(
-			'administrator' => esc_html__( 'Administrator', 'et_builder' ),
-			'editor'        => esc_html__( 'Editor', 'et_builder' ),
-			'author'        => esc_html__( 'Author', 'et_builder' ),
-			'contributor'   => esc_html__( 'Contributor', 'et_builder' ),
-		);
-	}
+	$builder_roles_array = et_pb_get_all_roles_list();
 
 	foreach( $builder_roles_array as $role => $role_title ) {
 		$option_tabs .= et_pb_generate_roles_tab( $all_role_options, $role );
@@ -5597,8 +5673,8 @@ function et_pb_generate_capabilities_output( $cap_array, $role ) {
 							</select>
 						</div>
 					</div>',
-					esc_html__( 'Enable', 'et_builder' ),
-					esc_html__( 'Disable', 'et_builder' ),
+					esc_html__( 'Enabled', 'et_builder' ),
+					esc_html__( 'Disabled', 'et_builder' ),
 					esc_attr( $capability ),
 					esc_html( $capability_details['name'] ),
 					! empty( $saved_capabilities[$role][$capability] ) ? selected( 'on', $saved_capabilities[$role][$capability], false ) : selected( 'on', $capability_details['default'], false ),
@@ -5766,6 +5842,18 @@ function et_builder_replace_code_content_entities( $content ) {
 }
 endif;
 
+/*
+ * we use placeholders to preserve the line-breaks,
+ * convert them back to \n
+ */
+if ( ! function_exists( 'et_builder_convert_line_breaks' ) ) :
+function et_builder_convert_line_breaks( $content ) {
+	$content = str_replace( array( '<!– [et_pb_line_break_holder] –>', '<!-- [et_pb_line_break_holder] -->' ), "\n", $content );
+
+	return $content;
+}
+endif;
+
 // adjust the number of all layouts displayed on library page to exclude predefined layouts
 function et_pb_fix_count_library_items( $counts ) {
 	// do nothing if get_current_screen function doesn't exists at this point to avoid php errors in some plugins.
@@ -5882,11 +5970,13 @@ add_action( 'pre_get_posts', 'et_pb_custom_search' );
 
 if ( ! function_exists( 'et_custom_comments_display' ) ) :
 function et_custom_comments_display( $comment, $args, $depth ) {
-	$GLOBALS['comment'] = $comment; ?>
+	$GLOBALS['comment'] = $comment;
+
+	$default_avatar = get_option( 'avatar_default' ) ? get_option( 'avatar_default' ) : 'mystery'; ?>
 	<li <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>">
 		<article id="comment-<?php comment_ID(); ?>" class="comment-body clearfix">
 			<div class="comment_avatar">
-				<?php echo get_avatar( $comment, $size = '80', 'mystery', esc_attr( get_comment_author() ) ); ?>
+				<?php echo get_avatar( $comment, $size = '80', esc_attr( $default_avatar ), esc_attr( get_comment_author() ) ); ?>
 			</div>
 
 			<div class="comment_postinfo">
@@ -6026,13 +6116,22 @@ function et_pb_get_post_categories( $post_id ) {
  * @return void
  */
 function et_fb_add_admin_bar_link() {
-	if ( ! is_singular( et_builder_get_builder_post_types() ) || ! et_pb_is_allowed( 'use_visual_builder' ) ) {
+	if ( ( ! is_singular( et_builder_get_builder_post_types() ) && ! et_builder_used_in_wc_shop() ) || ! et_pb_is_allowed( 'use_visual_builder' ) ) {
 		return;
 	}
 
 	global $wp_admin_bar, $wp_the_query;
 
-	$page_url = get_permalink( get_the_ID() );
+	$post_id = get_the_ID();
+
+	// WooCommerce Shop Page replaces main query, thus it has to be normalized
+	if ( et_builder_used_in_wc_shop() && method_exists( $wp_the_query, 'get_queried_object' ) && isset( $wp_the_query->get_queried_object()->ID ) ) {
+		$post_id = $wp_the_query->get_queried_object()->ID;
+	}
+
+	$is_divi_library = 'et_pb_layout' === get_post_type( $post_id );
+
+	$page_url = $is_divi_library ? get_edit_post_link( $post_id ) : get_permalink( $post_id );
 
 	// Don't add the link, if Frontend Builder has been loaded already
 	if ( et_fb_is_enabled() ) {
@@ -6051,10 +6150,10 @@ function et_fb_add_admin_bar_link() {
 		return;
 	}
 
-	$use_visual_builder_url = et_pb_is_pagebuilder_used( get_the_ID() ) ?
+	$use_visual_builder_url = et_pb_is_pagebuilder_used( $post_id ) ?
 		add_query_arg( 'et_fb', '1', et_fb_prepare_ssl_link( $page_url ) ) :
 		add_query_arg( array(
-			'et_fb_activation_nonce' => wp_create_nonce( 'et_fb_activation_nonce_' . get_the_ID() ),
+			'et_fb_activation_nonce' => wp_create_nonce( 'et_fb_activation_nonce_' . $post_id ),
 		), $page_url );
 
 	$wp_admin_bar->add_menu( array(
@@ -6291,6 +6390,7 @@ function et_strip_shortcodes( $content, $truncate_post_based_shortcodes_only = f
 			'et_pb_post_slider',
 			'et_pb_fullwidth_post_slider',
 			'et_pb_blog',
+			'et_pb_comments',
 		);
 	}
 
@@ -6748,6 +6848,20 @@ function et_builder_get_shortcuts( $on = 'fb' ) {
 	}
 
 	return $filtered_shortcuts;
+}
+endif;
+
+/**
+ * Parsed *_last_edited value and determine wheter the passed string means it has responsive value or not
+ * *_last_edited holds two values (responsive status and last opened tabs) in the following format: status|last_opened_tab
+ * @param string last_edited data
+ * @return bool
+ */
+if ( ! function_exists( 'et_pb_get_responsive_status' ) ) :
+function et_pb_get_responsive_status( $last_edited ) {
+	$parsed_last_edited = is_string( $last_edited ) ? explode( '|', $last_edited ) : array( 'off', 'desktop' );
+
+	return isset( $parsed_last_edited[0] ) ? $parsed_last_edited[0] === 'on' : false;
 }
 endif;
 

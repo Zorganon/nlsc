@@ -144,7 +144,7 @@ class Tribe__Events__Aggregator__Cron {
 	 */
 	public function action_register_cron() {
 		// if the service isn't active, don't do anything
-		if ( ! Tribe__Events__Aggregator::instance()->is_service_active() ) {
+		if ( ! tribe( 'events-aggregator.main' )->is_service_active() ) {
 			return;
 		}
 
@@ -220,7 +220,7 @@ class Tribe__Events__Aggregator__Cron {
 			return $run;
 		}
 
-		$service = Tribe__Events__Aggregator__Service::instance();
+		$service = tribe( 'events-aggregator.service' );
 
 		// If the Domain is not we just keep the same answer
 		if ( 0 !== strpos( $url, $service->api()->domain ) ) {
@@ -250,7 +250,12 @@ class Tribe__Events__Aggregator__Cron {
 	 */
 	public function run() {
 		// if the service isn't active, don't do anything
-		if ( ! Tribe__Events__Aggregator::instance()->is_service_active() ) {
+		if ( ! tribe( 'events-aggregator.main' )->is_service_active() ) {
+			return;
+		}
+
+		// if the service has been disabled by the user don't do anything
+		if ( true === tribe_get_option( 'tribe_aggregator_disable', false ) ) {
 			return;
 		}
 
@@ -274,12 +279,12 @@ class Tribe__Events__Aggregator__Cron {
 	 */
 	public function verify_child_record_creation() {
 		// if the service isn't active, don't do anything
-		if ( ! Tribe__Events__Aggregator::instance()->is_service_active() ) {
+		if ( ! tribe( 'events-aggregator.main' )->is_service_active() ) {
 			return;
 		}
 
 		$records = Tribe__Events__Aggregator__Records::instance();
-		$service = Tribe__Events__Aggregator__Service::instance();
+		$service = tribe( 'events-aggregator.service' );
 
 		$query = $records->query( array(
 			'post_status' => Tribe__Events__Aggregator__Records::$status->schedule,
@@ -324,6 +329,11 @@ class Tribe__Events__Aggregator__Cron {
 					$this->log( 'debug', sprintf( '%s — %s (%s)', $response->status, $response->message, $response->data->import_id ) );
 
 					$record->update_meta( 'last_import_status', 'success:queued' );
+				} elseif ( is_numeric( $response ) ) {
+					// it's the post ID of a rescheduled record
+					$this->log( 'debug', sprintf( 'rescheduled — %s', $response ) );
+
+					$record->update_meta( 'last_import_status', 'queued' );
 				} else {
 					$this->log( 'debug', 'Could not create Queue on Service' );
 
@@ -344,7 +354,7 @@ class Tribe__Events__Aggregator__Cron {
 	 */
 	public function verify_fetching_from_service() {
 		// if the service isn't active, don't do anything
-		if ( ! Tribe__Events__Aggregator::instance()->is_service_active() ) {
+		if ( ! tribe( 'events-aggregator.main' )->is_service_active() ) {
 			return;
 		}
 
@@ -382,8 +392,14 @@ class Tribe__Events__Aggregator__Cron {
 
 			if ( ! is_wp_error( $queue ) ) {
 				/** @var Tribe__Events__Aggregator__Record__Queue $queue */
-				$this->log( 'debug', sprintf( 'Record (%d) has processed queue ', $queue->record->id ) );
-				$activity = $queue->activity()->get();
+				$this->log( 'debug', sprintf( 'Record (%d) has processed queue ', $record->id ) );
+
+				if ( $queue instanceof Tribe__Events__Aggregator__Record__Queue ) {
+					$activity = $queue->activity()->get();
+				} else {
+					// if fetching or on error
+					$activity = $queue->get();
+				}
 
 				foreach ( $activity as $key => $actions ) {
 					foreach ( $actions as $action => $ids ) {

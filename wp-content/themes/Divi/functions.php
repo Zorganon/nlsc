@@ -58,6 +58,8 @@ function et_setup_theme() {
 
 	add_theme_support( 'woocommerce' );
 
+	add_theme_support( 'customize-selective-refresh-widgets' );
+
 	remove_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
 
 	remove_action( 'woocommerce_before_main_content', 'woocommerce_output_content_wrapper', 10 );
@@ -1119,16 +1121,25 @@ function et_divi_customizer_theme_settings( $wp_customize ) {
 		) ) );
 	}
 
+	// Remove default background_repeat setting and control since native
+	// background_repeat field has different different settings
+	$wp_customize->remove_setting( 'background_repeat' );
+	$wp_customize->remove_control( 'background_repeat' );
+
+	// Re-defined Divi specific background repeat option
+	$wp_customize->add_setting( 'background_repeat', array(
+		'default'           => apply_filters( 'et_divi_background_repeat_default', 'repeat' ),
+		'sanitize_callback' => 'et_sanitize_background_repeat',
+		'theme_supports'    => 'custom-background',
+		'capability'        => 'edit_theme_options',
+		'transport'         => 'postMessage',
+	) );
+
 	$wp_customize->add_control( 'background_repeat', array(
 		'label'		=> esc_html__( 'Background Repeat', 'Divi' ),
 		'section'	=> 'et_divi_general_background',
 		'type'      => 'radio',
-		'choices'    => array(
-				'no-repeat'  => esc_html__( 'No Repeat', 'Divi' ),
-				'repeat'     => esc_html__( 'Tile', 'Divi' ),
-				'repeat-x'   => esc_html__( 'Tile Horizontally', 'Divi' ),
-				'repeat-y'   => esc_html__( 'Tile Vertically', 'Divi' ),
-			),
+		'choices'   => et_divi_background_repeat_choices(),
 	) );
 
 	$wp_customize->add_control( 'background_position_x', array(
@@ -1142,14 +1153,24 @@ function et_divi_customizer_theme_settings( $wp_customize ) {
 			),
 	) );
 
+	// Remove default background_attachment setting and control since native
+	// background_attachment field has different different settings
+	$wp_customize->remove_setting( 'background_attachment' );
+	$wp_customize->remove_control( 'background_attachment' );
+
+	$wp_customize->add_setting( 'background_attachment', array(
+		'default'           => apply_filters( 'et_sanitize_background_attachment_default', 'scroll' ),
+		'sanitize_callback' => 'et_sanitize_background_attachment',
+		'theme_supports'    => 'custom-background',
+		'capability'        => 'edit_theme_options',
+		'transport'         => 'postMessage',
+	) );
+
 	$wp_customize->add_control( 'background_attachment', array(
 		'label'		=> esc_html__( 'Background Position', 'Divi' ),
 		'section'	=> 'et_divi_general_background',
 		'type'      => 'radio',
-		'choices'    => array(
-				'scroll'     => esc_html__( 'Scroll', 'Divi' ),
-				'fixed'      => esc_html__( 'Fixed', 'Divi' ),
-			),
+		'choices'    => et_divi_background_attachment_choices(),
 	) );
 
 	$wp_customize->add_setting( 'et_divi[body_font_size]', array(
@@ -2437,7 +2458,7 @@ function et_divi_customizer_theme_settings( $wp_customize ) {
 	) ) );
 
 	$wp_customize->add_setting( 'et_divi[widget_header_font_size]', array(
-		'default'       => et_get_option( 'body_header_size' * .6, '18' ),
+		'default'       => absint( et_get_option( 'body_header_size', '30' ) ) * .6,
 		'type'          => 'option',
 		'capability'    => 'edit_theme_options',
 		'transport'     => 'postMessage',
@@ -5711,6 +5732,9 @@ if ( class_exists( 'WP_Customize_Control' ) ) {
 		public function __construct( $manager, $id, $args = array() ) {
 			$this->statuses = array( '' => esc_html__( 'Default', 'Divi' ) );
 			parent::__construct( $manager, $id, $args );
+
+			// Printed saved value should always be in lowercase
+			add_filter( "customize_sanitize_js_{$id}", array( $this, 'sanitize_saved_value' ) );
 		}
 
 		public function enqueue() {
@@ -5749,6 +5773,16 @@ if ( class_exists( 'WP_Customize_Control' ) ) {
 				</div>
 			</label>
 			<?php
+		}
+
+		/**
+		 * Ensure saved value to be printed in lowercase.
+		 * Mismatched case causes broken 4.7 in Customizer. Color Alpha control only saves string.
+		 * @param string  saved value
+		 * @return string formatted value
+		 */
+		public function sanitize_saved_value( $value ) {
+			return strtolower( $value );
 		}
 	}
 
@@ -5849,7 +5883,7 @@ function et_divi_add_customizer_css(){ ?>
 		$footer_widget_header_color = et_get_option( 'footer_widget_header_color', $accent_color );
 		$footer_widget_bullet_color = et_get_option( 'footer_widget_bullet_color', $accent_color );
 
-		$widget_header_font_size = intval( et_get_option( 'widget_header_font_size', intval( et_get_option( 'body_header_size' * .6, '18' ) ) ) );
+		$widget_header_font_size = intval( et_get_option( 'widget_header_font_size', $body_header_size * .6 ) );
 		$widget_body_font_size = absint( et_get_option( 'widget_body_font_size', $body_font_size ) );
 		$widget_body_line_height = floatval( et_get_option( 'widget_body_line_height', '1.7' ) );
 
@@ -6507,7 +6541,7 @@ function et_divi_add_customizer_css(){ ?>
 				.et_pb_section.et_pb_fullwidth_section { padding: 0; }
 			<?php } ?>
 			<?php if ( 30 !== $tablet_row_height ) { ?>
-				.et_pb_row, .et_pb_column .et_pb_row_inner { padding: <?php echo esc_html( $tablet_row_height ); ?>px 0 !important; }
+				.et_pb_row, .et_pb_column .et_pb_row_inner { padding: <?php echo esc_html( $tablet_row_height ); ?>px 0; }
 			<?php } ?>
 		}
 		@media only screen and ( max-width: 767px ) {
@@ -6529,7 +6563,7 @@ function et_divi_add_customizer_css(){ ?>
 				.et_pb_section.et_pb_fullwidth_section { padding: 0; }
 			<?php } ?>
 			<?php if ( 30 !== $phone_row_height && $tablet_row_height !== $phone_row_height ) { ?>
-				.et_pb_row, .et_pb_column .et_pb_row_inner { padding: <?php echo esc_html( $phone_row_height ); ?>px 0 !important; }
+				.et_pb_row, .et_pb_column .et_pb_row_inner { padding: <?php echo esc_html( $phone_row_height ); ?>px 0; }
 			<?php } ?>
 		}
 	</style>
@@ -6585,7 +6619,7 @@ function et_divi_add_customizer_css(){ ?>
 				.et_fb_preview_active.et_fb_preview_active--responsive_preview .et_pb_section.et_pb_fullwidth_section { padding: 0; }
 			<?php } ?>
 			<?php if ( 30 !== $tablet_row_height ) { ?>
-				.et_fb_preview_active.et_fb_preview_active--responsive_preview .et_pb_row, .et_fb_preview_active.et_fb_preview_active--responsive_preview .et_pb_column .et_pb_row_inner { padding: <?php echo esc_html( $tablet_row_height ); ?>px 0 !important; }
+				.et_fb_preview_active.et_fb_preview_active--responsive_preview .et_pb_row, .et_fb_preview_active.et_fb_preview_active--responsive_preview .et_pb_column .et_pb_row_inner { padding: <?php echo esc_html( $tablet_row_height ); ?>px 0; }
 			<?php } ?>
 
 			<?php if ( 14 !== $phone_body_font_size && $phone_body_font_size !== $tablet_body_font_size ) { ?>
@@ -6606,7 +6640,7 @@ function et_divi_add_customizer_css(){ ?>
 				.et_fb_preview_active.et_fb_preview_active--responsive_preview.et_fb_preview_active--responsive_preview--phone_preview .et_pb_section.et_pb_fullwidth_section { padding: 0; }
 			<?php } ?>
 			<?php if ( 30 !== $phone_row_height && $tablet_row_height !== $phone_row_height ) { ?>
-				.et_fb_preview_active.et_fb_preview_active--responsive_preview.et_fb_preview_active--responsive_preview--phone_preview .et_pb_row, .et_fb_preview_active.et_fb_preview_active--responsive_preview.et_fb_preview_active--responsive_preview--phone_preview .et_pb_column .et_pb_row_inner { padding: <?php echo esc_html( $phone_row_height ); ?>px 0 !important; }
+				.et_fb_preview_active.et_fb_preview_active--responsive_preview.et_fb_preview_active--responsive_preview--phone_preview .et_pb_row, .et_fb_preview_active.et_fb_preview_active--responsive_preview.et_fb_preview_active--responsive_preview--phone_preview .et_pb_column .et_pb_row_inner { padding: <?php echo esc_html( $phone_row_height ); ?>px 0; }
 			<?php } ?>
 		</style>
 	<?php } ?>
@@ -8015,7 +8049,7 @@ function et_password_form() {
 			<form action="%3$s" method="post">
 				<p><label for="%4$s">%5$s: </label><input name="post_password" id="%4$s" type="password" size="20" maxlength="20" /></p>
 				<p><button type="submit" class="et_submit_button et_pb_button">%6$s</button></p>
-			</form
+			</form>
 		</div>',
 		esc_html__( 'Password Protected', 'Divi' ),
 		esc_html__( 'To view this protected post, enter the password below', 'Divi' ),
@@ -8065,8 +8099,17 @@ function et_add_wp_version( $classes ) {
 add_filter( 'body_class', 'et_add_wp_version' );
 add_filter( 'admin_body_class', 'et_add_wp_version' );
 
+/**
+ * Determine whether current primary nav uses transparent nav or not based on primary nav background
+ * @return bool
+ */
+function et_divi_is_transparent_primary_nav() {
+	return 'rgba' == substr( et_get_option( 'primary_nav_bg', '#ffffff' ), 0, 4 );
+}
+
 function et_layout_body_class( $classes ) {
-	if ( 'rgba' == substr( et_get_option( 'primary_nav_bg', '#ffffff' ), 0, 4 ) && false === et_get_option( 'vertical_nav', false ) ) {
+	$vertical_nav = et_get_option( 'vertical_nav', false );
+	if ( et_divi_is_transparent_primary_nav() && ( false === $vertical_nav || '' === $vertical_nav ) ) {
 		$classes[] = 'et_transparent_nav';
 	}
 
@@ -8225,7 +8268,7 @@ if ( ! function_exists( 'et_show_cart_total' ) ) {
 			esc_url( WC()->cart->get_cart_url() ),
 			( ! $args['no_text']
 				? esc_html( sprintf(
-					_nx( '1 Item', '%1$s Items', $items_number, 'WooCommerce items number', 'Divi' ),
+					_nx( '%1$s Item', '%1$s Items', $items_number, 'WooCommerce items number', 'Divi' ),
 					number_format_i18n( $items_number )
 				) )
 				: ''
@@ -8539,27 +8582,30 @@ function et_modify_canonical_redirect( $redirect_url, $requested_url ) {
 }
 add_filter( 'redirect_canonical', 'et_modify_canonical_redirect', 10, 2 );
 
-// Determines how many related products should be displayed on single product page
-if ( class_exists( 'WooCommerce' ) ) {
-	function woocommerce_output_related_products() {
-		$related_posts = 4; // 4 is default number
+/**
+ * Determines how many related products should be displayed on single product page
+ * @param array  related products arguments
+ * @return array modified related products arguments
+ */
+function et_divi_woocommerce_output_related_products_args( $args ) {
+	$related_posts = 4; // default number
 
-		if ( is_singular( 'product' ) ) {
-			$page_layout = get_post_meta( get_the_ID(), '_et_pb_page_layout', true );
+	if ( is_singular( 'product' ) ) {
+		$page_layout = get_post_meta( get_the_ID(), '_et_pb_page_layout', true );
 
-			if ( 'et_full_width_page' !== $page_layout ) {
-				$related_posts = 3; // set to 3 if page has sidebar
-			}
+		if ( 'et_full_width_page' !== $page_layout ) {
+			$related_posts = 3; // set to 3 if page has sidebar
 		}
-
-		$woocommerce_args = array(
-			'posts_per_page' => $related_posts,
-			'columns'        => $related_posts,
-		);
-
-		woocommerce_related_products( $woocommerce_args );
 	}
+
+	// Modify related and up-sell products args
+	$args['posts_per_page'] = $related_posts;
+	$args['columns']        = $related_posts;
+
+	return $args;
 }
+add_filter( 'woocommerce_upsell_display_args', 'et_divi_woocommerce_output_related_products_args' );
+add_filter( 'woocommerce_output_related_products_args', 'et_divi_woocommerce_output_related_products_args' );
 
 function et_divi_maybe_change_frontend_locale( $locale ) {
 	$option_name   = 'divi_disable_translations';

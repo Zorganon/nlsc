@@ -79,7 +79,7 @@
 			$cloned_nav.find('li:first').addClass('et_first_mobile_item');
 
 			$cloned_nav.find( 'a' ).on( 'click', function(){
-				$( '#et_mobile_nav_menu .mobile_menu_bar' ).trigger( 'click' );
+				$(this).parents( '.et_mobile_menu' ).siblings( '.mobile_menu_bar' ).trigger( 'click' );
 			} );
 
 			if ( 'no_click_event' !== menu_click_event ) {
@@ -123,5 +123,72 @@
 
 			$et_window.on( 'resize', $.proxy( et_calc_fullscreen_section, $this_section ) );
 		});
+	}
+
+	window.et_bar_counters_init = function( $bar_item ) {
+		if ( ! $bar_item.length ) {
+			return;
+		}
+
+		var $bar_container      = $bar_item.closest( '.et_pb_counter_container' ),
+			bar_item_width      = $bar_item.attr( 'data-width' ),
+			bar_item_padding    = Math.ceil( parseFloat( $bar_item.css('paddingLeft') ) ) + Math.ceil( parseFloat( $bar_item.css('paddingRight') ) ),
+			$bar_item_text      = $bar_item.children( '.et_pb_counter_amount_number' ),
+			calculated_width    = ( $bar_container.width() - $bar_item_text.innerWidth() ) / 100 * parseFloat( bar_item_width ),
+			bar_item_text_width = calculated_width + $bar_item_text.innerWidth();
+
+		$bar_item.css({
+			'width' : bar_item_text_width
+		});
+	}
+
+	window.et_fix_pricing_currency_position = function( $pricing_table ) {
+		var $all_pricing_tables = typeof $pricing_table !== 'undefined' ? $pricing_table : $( '.et_pb_pricing_table' );
+
+		if ( ! $all_pricing_tables.length ) {
+			return;
+		}
+
+		$all_pricing_tables.each( function() {
+			var $this_table = $( this ),
+				$price_container = $this_table.find( '.et_pb_et_price' ),
+				$currency = $price_container.length ? $price_container.find( '.et_pb_dollar_sign' ) : false,
+				$price = $price_container.length ? $price_container.find( '.et_pb_sum' ) : false;
+
+			if ( ! $currency || ! $price ) {
+				return;
+			}
+
+			// adjust the margin of currency sign to make sure it doesn't overflow the price
+			$currency.css( { 'marginLeft' : - $currency.width() + 'px' } );
+		});
+	}
+
+	window.et_pb_set_responsive_grid = function( $grid_items, $single_item_selector ) {
+		setTimeout( function() {
+			var container_width = $grid_items.innerWidth(),
+				item_width = $grid_items.find( $single_item_selector ).outerWidth( true ),
+				last_item_margin = item_width - $grid_items.find( $single_item_selector ).outerWidth(),
+				columns_count = Math.round( ( container_width + last_item_margin ) / item_width ),
+				counter = 1,
+				first_in_row = 1;
+
+			$grid_items.find( $single_item_selector ).removeClass( 'last_in_row first_in_row' );
+			$grid_items.find( $single_item_selector ).each( function() {
+				var $this_el = $( this );
+
+				if ( ! $this_el.hasClass( 'inactive' ) ) {
+					if ( first_in_row === counter ) {
+						$this_el.addClass( 'first_in_row' );
+					}
+
+					if ( 0 === counter % columns_count ) {
+						$this_el.addClass( 'last_in_row' );
+						first_in_row = counter + 1;
+					}
+					counter++;
+				}
+			});
+		}, 1 ); // need this timeout to make sure all the css applied before calculating sizes
 	}
 })(jQuery)
