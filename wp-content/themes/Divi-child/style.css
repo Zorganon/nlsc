@@ -45,13 +45,9 @@ Version: 1.0.0
 	margin: 0 20px 28px 0;
 	border: 0;
 }
+
 /* This makes the footer Sticky to the bottom of the pages */
-#main-footer {
-position: fixed;
-width: 100%;
-bottom: 0;
+/* Set footer height */
+#footer-bottom {
+	display: none;
 }
-/* Set footer height
-body #main-footer {
-height: 75px ;
-} */
