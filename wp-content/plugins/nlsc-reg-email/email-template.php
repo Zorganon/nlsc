@@ -2,9 +2,10 @@
  
 <img src="<?php echo $logoUrl; ?>" alt="NLSC"/>
  
-<h2>Northern Lights Sailing Club Application </h2>
+<h2>Northern Lights Sailing Club</h2>
+<h3>Thank you for beginning the NLSC Membership Application.</h3>
+<p>Your Username is: <?php echo $userLogin ?></p>
 
- 
 <p>
   The registration process involves 2 parts, The first you have completed, (signing up online, and paying dues).
   The second piece required for club membership is to sign the liability waiver.  

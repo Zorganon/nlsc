@@ -2,7 +2,7 @@
 function admin_default_page() {
   return '/members-home-page';
 }
-/*---------------------new Stuff ------------------------*/
+/*---------------------section for loading/queuing styles and scripts------------------------*/
 function my_theme_enqueue_styles() {
 
     $parent_style = 'Divi';
@@ -11,28 +11,27 @@ function my_theme_enqueue_styles() {
     wp_enqueue_style( 'Divi-child', get_stylesheet_directory_uri() . '/style.css', array( $parent_style ), wp_get_theme()->get('Version') );
 }
 add_action( 'wp_enqueue_scripts', 'my_theme_enqueue_styles' );
-/*---------------------end new Stuff ------------------------*/
+/*---------------------end loading section ------------------------*/
 /**
  * Function Name: front_end_login_fail.
  * Description: This redirects the failed login to the custom login page instead of default login page with a modified url
-**/
 add_action( 'wp_login_failed', 'front_end_login_fail' );
 function front_end_login_fail( $username ) {
 
 // Getting URL of the login page
 $referrer = $_SERVER['HTTP_REFERER'];    
 // if there's a valid referrer, and it's not the default log-in screen
-if( !empty( $referrer ) && !strstr( $referrer,'wp-login' ) && !strstr( $referrer,'wp-admin' ) ) {
+if( !empty( $referrer ) && !strstr( $referrer,'ahoy' ) && !strstr( $referrer,'wp-admin' ) && !strstr( $referrer,'wp-login' ) ) {
   wp_redirect( get_permalink( 430 ) . "?login=failed" ); 
   exit;
 }
 
 }
+**/
 
 /**
  * Function Name: check_username_password.
  * Description: This redirects to the custom login page if user name or password is   empty with a modified url
-**/
 add_action( 'authenticate', 'check_username_password', 1, 3);
 function check_username_password( $login, $username, $password ) {
 
@@ -48,6 +47,7 @@ function check_username_password( $login, $username, $password ) {
   }
 
 }
+**/
 
 /** THIS NOT WORKING
  * Code for a Login/Logout Button to be displayed in the Navigation Menu

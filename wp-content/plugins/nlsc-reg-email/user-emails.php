@@ -1,5 +1,4 @@
 
- 
 <?php
 // wp-content/plugins/user-emails/user-emails.php
 /*
@@ -21,14 +20,15 @@ Author URI: https://www.josephmsexton.com
  * @param 	string $plaintext_pass optional password
  */
 if ( !function_exists( 'wp_new_user_notification' ) ) {
-  function wp_new_user_notification( $user_login, $plaintext_pass = '' ) {
+  function wp_new_user_notification( $user_id, $plaintext_pass = '' ) {
 
     // set content type to html
     add_filter( 'wp_mail_content_type', 'wpmail_content_type' );
 
     // user
-    $user = new WP_User( $user_login );
+    $user = new WP_User( $user_id );
     $userEmail = stripslashes( $user->user_email );
+    $userLogin = stripslashes( $user->user_login );
     $siteUrl = get_site_url();
     $logoUrl = plugin_dir_url( __FILE__ ).'/sitelogo.gif';
 
@@ -41,7 +41,7 @@ if ( !function_exists( 'wp_new_user_notification' ) ) {
     @wp_mail( get_option( 'admin_email' ), 'New User Created', $message, $headers );
 
     ob_start();
-    include plugin_dir_path( __FILE__ ).'/email_welcome.php';
+    include plugin_dir_path( __FILE__ ).'/email-template.php';
     $message = ob_get_contents();
     ob_end_clean();
 
@@ -54,7 +54,7 @@ if ( !function_exists( 'wp_new_user_notification' ) ) {
 }
 
 
- 
+
 /**
  * wpmail_content_type
  * allow html emails

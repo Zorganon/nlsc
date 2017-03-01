@@ -1,2 +1,65 @@
 [22-Feb-2017 17:57:44 UTC] WordPress database error Table 'c9.wp_m_membership_relationships' doesn't exist for query SELECT count(*) FROM wp_m_membership_relationships WHERE sub_id != 0 AND expirydate <= '2017-02-22 17:57:44' ORDER BY expirydate ASC made by activate_plugin, include_once('/plugins/membership/membership.php'), membership2_init_old_app, require_once('/plugins/membership/app_old/membership.php'), require_once('/plugins/membership/app_old/membershipincludes/classes/membershipcron.php'), membershipcron->__construct, membershipcron->get_expiring_relationships_count
 [22-Feb-2017 17:57:44 UTC] WordPress database error Table 'c9.wp_m_membership_relationships' doesn't exist for query SELECT count(*) FROM wp_m_membership_relationships WHERE sub_id != 0 AND expirydate <= '2017-02-22 17:57:44' ORDER BY expirydate ASC made by require_once('wp-admin/admin.php'), require_once('wp-load.php'), require_once('wp-config.php'), require_once('wp-settings.php'), include_once('/plugins/membership/membership.php'), membership2_init_old_app, require_once('/plugins/membership/app_old/membership.php'), require_once('/plugins/membership/app_old/membershipincludes/classes/membershipcron.php'), membershipcron->__construct, membershipcron->get_expiring_relationships_count
+[28-Feb-2017 17:17:38 UTC] Call to https://us15.api.mailchimp.com/2.0/helper/ping.json: {"apikey":"b70e2c482f96763d147c271d4a194cfb-us15"}
+[28-Feb-2017 17:17:38 UTC] * Hostname was NOT found in DNS cache
+*   Trying 23.78.163.17...
+* Connected to us15.api.mailchimp.com (23.78.163.17) port 443 (#21)
+* successfully set certificate verify locations:
+*   CAfile: none
+  CApath: /etc/ssl/certs
+* SSL connection using ECDHE-ECDSA-AES256-GCM-SHA384
+* Server certificate:
+* 	 subject: C=US; ST=Georgia; L=Atlanta; O=The Rocket Science Group, LLC; OU=IT; CN=wildcardsan.us15.list-manage.com
+* 	 start date: 2017-02-17 00:00:00 GMT
+* 	 expire date: 2018-02-17 23:59:59 GMT
+* 	 subjectAltName: us15.api.mailchimp.com matched
+* 	 issuer: C=US; O=Symantec Corporation; OU=Symantec Trust Network; CN=Symantec Class 3 ECC 256 bit SSL CA - G2
+* 	 SSL certificate verify ok.
+> POST /2.0/helper/ping.json HTTP/1.1
+User-Agent: MailChimp-PHP/2.0.5
+Host: us15.api.mailchimp.com
+Accept: */*
+Content-Type: application/json
+Content-Length: 50
+
+* upload completely sent off: 50 out of 50 bytes
+< HTTP/1.1 200 OK
+* Server openresty is not blacklisted
+< Server: openresty
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 30
+< Vary: Accept-Encoding
+< Date: Tue, 28 Feb 2017 17:17:38 GMT
+< Connection: keep-alive
+< Set-Cookie: _AVESTA_ENVIRONMENT=prod; path=/
+< 
+* Connection #21 to host us15.api.mailchimp.com left intact
+
+[28-Feb-2017 17:17:38 UTC] Completed in 272.68ms
+[28-Feb-2017 17:17:38 UTC] Got response: {"msg":"Everything's Chimpy!"}
+[28-Feb-2017 17:17:38 UTC] Call to https://us15.api.mailchimp.com/2.0/lists/list.json: {"filters":[],"start":0,"limit":25,"sort_field":"created","sort_dir":"DESC","apikey":"b70e2c482f96763d147c271d4a194cfb-us15"}
+[28-Feb-2017 17:17:38 UTC] * Found bundle for host us15.api.mailchimp.com: 0x5564b915e590
+* Re-using existing connection! (#21) with host us15.api.mailchimp.com
+* Connected to us15.api.mailchimp.com (23.78.163.17) port 443 (#21)
+> POST /2.0/lists/list.json HTTP/1.1
+User-Agent: MailChimp-PHP/2.0.5
+Host: us15.api.mailchimp.com
+Accept: */*
+Content-Type: application/json
+Content-Length: 125
+
+* upload completely sent off: 125 out of 125 bytes
+< HTTP/1.1 200 OK
+* Server openresty is not blacklisted
+< Server: openresty
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 937
+< Vary: Accept-Encoding
+< Date: Tue, 28 Feb 2017 17:17:38 GMT
+< Connection: keep-alive
+< Set-Cookie: _AVESTA_ENVIRONMENT=prod; path=/
+< 
+* Connection #21 to host us15.api.mailchimp.com left intact
+
+[28-Feb-2017 17:17:38 UTC] Completed in 168.31ms
+[28-Feb-2017 17:17:38 UTC] Got response: {"total":1,"data":[{"id":"0b75f49a41","web_id":35107,"name":"NLSC All Members","date_created":"2017-02-02 23:19:31","email_type_option":false,"use_awesomebar":true,"default_from_name":"Northern Lights Sailing Club","default_from_email":"nlsc_mail@nlsc.org","default_subject":"","default_language":"en","list_rating":0,"subscribe_url_short":"http:\/\/eepurl.com\/cD_MNf","subscribe_url_long":"http:\/\/nlsc.us15.list-manage.com\/subscribe?u=c8e3d5b1d78491ff7b1e22444&id=0b75f49a41","beamer_address":"us15-c75ebc541c-98943b1d98@inbound.mailchimp.com","visibility":"pub","stats":{"member_count":0,"unsubscribe_count":0,"cleaned_count":0,"member_count_since_send":0,"unsubscribe_count_since_send":0,"cleaned_count_since_send":0,"campaign_count":0,"grouping_count":0,"group_count":0,"merge_var_count":2,"avg_sub_rate":0,"avg_unsub_rate":0,"target_sub_rate":0,"open_rate":0,"click_rate":0,"date_last_campaign":null},"modules":[]}],"errors":[]}
