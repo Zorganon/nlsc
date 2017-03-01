@@ -1,4 +1,3 @@
-
 <?php
 // wp-content/plugins/user-emails/user-emails.php
 /*
@@ -6,7 +5,6 @@ Plugin Name: NLSC Registration Email
 Description: Changes the default user emails
 Version: 1.0
 Author: Dan Hudson
-Author URI: https://www.josephmsexton.com
 */
 
 

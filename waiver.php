@@ -1,10 +1,8 @@
-<?php
-/*
-Template Name: Liability Waiver Page
-*/
-?>
 
-<?php
+<!DOCTYPE html>
+<head>
+<?php 
+
 //this code loads the wp functions for us to use
 if ( !isset($wp_did_header) ) {
     $wp_did_header = true;
@@ -13,13 +11,18 @@ if ( !isset($wp_did_header) ) {
     require_once( ABSPATH . WPINC . '/template-loader.php' );
 }
 
+if (!is_user_logged_in()){
+	wp_redirect('https://nlsc.org');
+	exit;
+}
+
 //define variables and set to empty values
 global $wpdb;
 
 $saveErr = $nameErr = $signatureErr = "";
 $name = $signature = "";
 $user_id = get_current_user();
-$date_signed = date_create();
+$date_signed = date("jS \of F Y");
 $version = "1.5";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -45,13 +48,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	}
 
 	//Data insertion into database
-	if (is_user_logged_in()) {
+	
+	if (($nameErr == '')&&($signatureErr == '')) {
 		$current_user = wp_get_current_user();
 		$user_id = $current_user->ID;
+		$userLogin = $current_user->user_login;
 		$data = array( 'user_id' => $user_id, 'waiver_version' => $version, 'member_name' => $name, 'member_signature' => $signature);
 		if ($wpdb->insert( 'liability_waiver', $data )) {
+			// Email information
+			add_filter( 'wp_mail_content_type', 'text/html' );
+			$email = $current_user->user_email;
+			$subject = "NLSC Liability Waiver";
+			$headers = 'From: NLSC <membership@nlsc.org>';
+			$message = "New Waiver Signed by Username: ".$userLogin;
+			
+			ob_start();
+		    include get_stylesheet_directory().'/waiver-email-template.php';
+		    $message .= ob_get_contents();
+		    ob_end_clean();
+				
+			wp_mail( $email, $subject, $message, $headers );
+			wp_mail( get_option('admin_email'), 'New NLSC Waiver Signed', $message, $headers );
+			remove_filter( 'wp_mail_content_type', 'text/html' );
+
 			wp_redirect('https://nlsc.org');
 			exit;
+
 		} else {
 			$saveErr = "The form was not saved properly, please log out, log back in, and try again.";
 		}
@@ -64,15 +86,11 @@ function test_input($data) {
 	$data = htmlspecialchars($data);
 	return $data;
 }
-
+// Add anything you want to display to the user
 ?>
-
-<!DOCTYPE html>
-<head>
-
 </head>
 <body>
-	<h2 style="text-color:red"><?php echo $saveError ?></h2>
+	<h2 style="color:red; <?php if ($saveErr == ''){ echo 'display:none;';}?>"><?php echo $saveErr ?></h2>
 	<div class="main-doc" style="margin: 30px">
 		<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
 			<h1>Northern Lights Sailing Club</h1>
@@ -89,9 +107,9 @@ function test_input($data) {
 			<p>I hereby agree that Minnesota law shall govern my participation in NLSC Events and the construction, interpretation and enforcement of this Mutual Release, regardless of the location(s) in which an NLSC Event is held or in which my death, injury, property damage or loss may arise. In the event that a court determines that any provision of this Mutual Release is unenforceable or invalid, I agree that it will not affect the enforceability or validity of the remaining portions of this Mutual Release.</p>
 			<p><b>I UNDERSTAND BY MAKING AND SIGNING THIS MUTUAL RELEASE I SURRENDER VALUABLE RIGHTS, INCLUDING BUT NOT LIMITED TO ANY RIGHT TO SUE THE RELEASED PARTIES.</b></p>
 			<p><b>I CERTIFY THAT I HAVE CAREFULLY READ AND UNDERSTOOD ALL PARTS OF THIS MUTUAL RELEASE AND SIGN IT FREELY AND INTENDING TO BE LEGALLY BOUND BY IT.</b></p>
-			<h6><i>Document Version: 1.5</i></h6>
+			<h6><i>Document Version: <?php echo $version; ?></i></h6>
 			<p>Signature: <input type="text" name="signature" value="<?php echo $signature;?>"></p>
-			<p><?php echo date("jS \of F Y") ?></p>
+			<p><?php echo $date_signed ?></p>
 			<input type="submit">
 			<span class="error"><?php echo $nameErr;?></span>
 			<span class="error"><?php echo $signatureErr;?></span>
