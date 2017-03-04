@@ -74,6 +74,28 @@ function wti_loginout_menu_link( $items, $args ) {
    return $items;
 }
 
+//This code allows the /profile url to redirect a user to their profile page
+function redirect2profile(){
+	include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+	if($_SERVER['REQUEST_URI'] == '/profile/' && is_plugin_active('buddypress/bp-loader.php') && is_user_logged_in()){
+		global $current_user;
+		wp_redirect( get_bloginfo('url') . '/members/'. $current_user->user_login . '/profile/'); 
+		exit();
+	}
+ }
+add_action('init', 'redirect2profile');
+
+//this code adds a shortcode for navigation menus
+//[menu name="-your menu name-" class="-your class-"]
+function print_menu_shortcode($atts, $content = null) {
+    extract(shortcode_atts(array( 'name' => null, 'class' => null ), $atts));
+    return wp_nav_menu( array( 'menu' => $name, 'menu_class' => $class, 'echo' => false ) );
+}
+add_shortcode('menu', 'print_menu_shortcode');
+
+
+
+
 /*-----------DEBUG ------------  
 $debug_tags = array();
 add_action( 'all', function ( $tag ) {

@@ -90,3 +90,6 @@ if ( !defined('ABSPATH') )
 
 /** Sets up WordPress vars and included files. */
 require_once(ABSPATH . 'wp-settings.php');
+
+//allows membership Administration apart from just the "admin" role.
+define( "MS_ADMIN_CAPABILITY", "membership_admin" );

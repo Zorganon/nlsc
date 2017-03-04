@@ -1,4 +1,4 @@
-<p>New Waiver Signed by User: <?php echo $userLogin; ?></p>
+<p>Waiver Signed by User: <?php echo $userLogin; ?></p>
 <h1>Northern Lights Sailing Club</h1>
 <h2>Mutual Release of Liability and Indemnification</h2>
 <h3>As a member or guest of Northern Lights Sailing Club (NLSC) and a participant in events planned and executed by NLSC; I understand that boating of any type, duration or location can be hazardous. I recognize the inherent risks of engaging in these events can include: death, injury to my person and loss of or damage to my property.</h3>

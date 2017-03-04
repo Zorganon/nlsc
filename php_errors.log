@@ -63,3 +63,244 @@ Content-Length: 125
 
 [28-Feb-2017 17:17:38 UTC] Completed in 168.31ms
 [28-Feb-2017 17:17:38 UTC] Got response: {"total":1,"data":[{"id":"0b75f49a41","web_id":35107,"name":"NLSC All Members","date_created":"2017-02-02 23:19:31","email_type_option":false,"use_awesomebar":true,"default_from_name":"Northern Lights Sailing Club","default_from_email":"nlsc_mail@nlsc.org","default_subject":"","default_language":"en","list_rating":0,"subscribe_url_short":"http:\/\/eepurl.com\/cD_MNf","subscribe_url_long":"http:\/\/nlsc.us15.list-manage.com\/subscribe?u=c8e3d5b1d78491ff7b1e22444&id=0b75f49a41","beamer_address":"us15-c75ebc541c-98943b1d98@inbound.mailchimp.com","visibility":"pub","stats":{"member_count":0,"unsubscribe_count":0,"cleaned_count":0,"member_count_since_send":0,"unsubscribe_count_since_send":0,"cleaned_count_since_send":0,"campaign_count":0,"grouping_count":0,"group_count":0,"merge_var_count":2,"avg_sub_rate":0,"avg_unsub_rate":0,"target_sub_rate":0,"open_rate":0,"click_rate":0,"date_last_campaign":null},"modules":[]}],"errors":[]}
+[01-Mar-2017 22:56:43 UTC] Call to https://us15.api.mailchimp.com/2.0/helper/ping.json: {"apikey":"b70e2c482f96763d147c271d4a194cfb-us15"}
+[01-Mar-2017 22:56:43 UTC] * Hostname was NOT found in DNS cache
+*   Trying 23.199.205.106...
+* Connected to us15.api.mailchimp.com (23.199.205.106) port 443 (#40)
+* successfully set certificate verify locations:
+*   CAfile: none
+  CApath: /etc/ssl/certs
+* SSL connection using ECDHE-ECDSA-AES256-GCM-SHA384
+* Server certificate:
+* 	 subject: C=US; ST=Georgia; L=Atlanta; O=The Rocket Science Group, LLC; OU=IT; CN=wildcardsan.us15.list-manage.com
+* 	 start date: 2017-02-17 00:00:00 GMT
+* 	 expire date: 2018-02-17 23:59:59 GMT
+* 	 subjectAltName: us15.api.mailchimp.com matched
+* 	 issuer: C=US; O=Symantec Corporation; OU=Symantec Trust Network; CN=Symantec Class 3 ECC 256 bit SSL CA - G2
+* 	 SSL certificate verify ok.
+> POST /2.0/helper/ping.json HTTP/1.1
+User-Agent: MailChimp-PHP/2.0.5
+Host: us15.api.mailchimp.com
+Accept: */*
+Content-Type: application/json
+Content-Length: 50
+
+* upload completely sent off: 50 out of 50 bytes
+< HTTP/1.1 200 OK
+* Server openresty is not blacklisted
+< Server: openresty
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 30
+< Vary: Accept-Encoding
+< Date: Wed, 01 Mar 2017 22:56:43 GMT
+< Connection: keep-alive
+< Set-Cookie: _AVESTA_ENVIRONMENT=prod; path=/
+< 
+* Connection #40 to host us15.api.mailchimp.com left intact
+
+[01-Mar-2017 22:56:43 UTC] Completed in 247.15ms
+[01-Mar-2017 22:56:43 UTC] Got response: {"msg":"Everything's Chimpy!"}
+[01-Mar-2017 22:56:43 UTC] Call to https://us15.api.mailchimp.com/2.0/lists/member-info.json: {"id":"0b75f49a41","emails":[{"email":"z.o.r.g.a.non33@gmail.com"}],"apikey":"b70e2c482f96763d147c271d4a194cfb-us15"}
+[01-Mar-2017 22:56:44 UTC] * Found bundle for host us15.api.mailchimp.com: 0x5564b90c27d0
+* Re-using existing connection! (#40) with host us15.api.mailchimp.com
+* Connected to us15.api.mailchimp.com (23.199.205.106) port 443 (#40)
+> POST /2.0/lists/member-info.json HTTP/1.1
+User-Agent: MailChimp-PHP/2.0.5
+Host: us15.api.mailchimp.com
+Accept: */*
+Content-Type: application/json
+Content-Length: 117
+
+* upload completely sent off: 117 out of 117 bytes
+< HTTP/1.1 200 OK
+* Server openresty is not blacklisted
+< Server: openresty
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 167
+< Vary: Accept-Encoding
+< Date: Wed, 01 Mar 2017 22:56:44 GMT
+< Connection: keep-alive
+< Set-Cookie: _AVESTA_ENVIRONMENT=prod; path=/
+< 
+* Connection #40 to host us15.api.mailchimp.com left intact
+
+[01-Mar-2017 22:56:44 UTC] Completed in 97.99ms
+[01-Mar-2017 22:56:44 UTC] Got response: {"success_count":0,"error_count":1,"errors":[{"email":{"email":"z.o.r.g.a.non33@gmail.com"},"error":"The id passed does not exist on this list","code":232}],"data":[]}
+[01-Mar-2017 22:56:44 UTC] Call to https://us15.api.mailchimp.com/2.0/lists/subscribe.json: {"id":"0b75f49a41","email":{"email":"z.o.r.g.a.non33@gmail.com"},"merge_vars":{"FNAME":"Normal","LNAME":"User","optin_ip":"10.240.1.17","optin_time":"2017-03-01 22:56:44"},"email_type":"html","double_optin":false,"update_existing":true,"replace_interests":true,"send_welcome":false,"apikey":"b70e2c482f96763d147c271d4a194cfb-us15"}
+[01-Mar-2017 22:56:44 UTC] * Found bundle for host us15.api.mailchimp.com: 0x5564b90c27d0
+* Re-using existing connection! (#40) with host us15.api.mailchimp.com
+* Connected to us15.api.mailchimp.com (23.199.205.106) port 443 (#40)
+> POST /2.0/lists/subscribe.json HTTP/1.1
+User-Agent: MailChimp-PHP/2.0.5
+Host: us15.api.mailchimp.com
+Accept: */*
+Content-Type: application/json
+Content-Length: 331
+
+* upload completely sent off: 331 out of 331 bytes
+< HTTP/1.1 200 OK
+* Server openresty is not blacklisted
+< Server: openresty
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 75
+< Vary: Accept-Encoding
+< Date: Wed, 01 Mar 2017 22:56:44 GMT
+< Connection: keep-alive
+< Set-Cookie: _AVESTA_ENVIRONMENT=prod; path=/
+< 
+* Connection #40 to host us15.api.mailchimp.com left intact
+
+[01-Mar-2017 22:56:44 UTC] Completed in 134.38ms
+[01-Mar-2017 22:56:44 UTC] Got response: {"email":"z.o.r.g.a.non33@gmail.com","euid":"2cd1086fb5","leid":"37500951"}
+[01-Mar-2017 22:57:23 UTC] Call to https://us15.api.mailchimp.com/2.0/helper/ping.json: {"apikey":"b70e2c482f96763d147c271d4a194cfb-us15"}
+[01-Mar-2017 22:57:24 UTC] * Hostname was NOT found in DNS cache
+*   Trying 23.199.205.106...
+* Connected to us15.api.mailchimp.com (23.199.205.106) port 443 (#42)
+* successfully set certificate verify locations:
+*   CAfile: none
+  CApath: /etc/ssl/certs
+* SSL connection using ECDHE-ECDSA-AES256-GCM-SHA384
+* Server certificate:
+* 	 subject: C=US; ST=Georgia; L=Atlanta; O=The Rocket Science Group, LLC; OU=IT; CN=wildcardsan.us15.list-manage.com
+* 	 start date: 2017-02-17 00:00:00 GMT
+* 	 expire date: 2018-02-17 23:59:59 GMT
+* 	 subjectAltName: us15.api.mailchimp.com matched
+* 	 issuer: C=US; O=Symantec Corporation; OU=Symantec Trust Network; CN=Symantec Class 3 ECC 256 bit SSL CA - G2
+* 	 SSL certificate verify ok.
+> POST /2.0/helper/ping.json HTTP/1.1
+User-Agent: MailChimp-PHP/2.0.5
+Host: us15.api.mailchimp.com
+Accept: */*
+Content-Type: application/json
+Content-Length: 50
+
+* upload completely sent off: 50 out of 50 bytes
+< HTTP/1.1 200 OK
+* Server openresty is not blacklisted
+< Server: openresty
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 30
+< Vary: Accept-Encoding
+< Date: Wed, 01 Mar 2017 22:57:24 GMT
+< Connection: keep-alive
+< Set-Cookie: _AVESTA_ENVIRONMENT=prod; path=/
+< 
+* Connection #42 to host us15.api.mailchimp.com left intact
+
+[01-Mar-2017 22:57:24 UTC] Completed in 195.43ms
+[01-Mar-2017 22:57:24 UTC] Got response: {"msg":"Everything's Chimpy!"}
+[01-Mar-2017 22:57:24 UTC] Call to https://us15.api.mailchimp.com/2.0/lists/member-info.json: {"id":"0b75f49a41","emails":[{"email":"z.o.r.ganon33@gmail.com"}],"apikey":"b70e2c482f96763d147c271d4a194cfb-us15"}
+[01-Mar-2017 22:57:24 UTC] * Found bundle for host us15.api.mailchimp.com: 0x5564b9508260
+* Re-using existing connection! (#42) with host us15.api.mailchimp.com
+* Connected to us15.api.mailchimp.com (23.199.205.106) port 443 (#42)
+> POST /2.0/lists/member-info.json HTTP/1.1
+User-Agent: MailChimp-PHP/2.0.5
+Host: us15.api.mailchimp.com
+Accept: */*
+Content-Type: application/json
+Content-Length: 115
+
+* upload completely sent off: 115 out of 115 bytes
+< HTTP/1.1 200 OK
+* Server openresty is not blacklisted
+< Server: openresty
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 165
+< Vary: Accept-Encoding
+< Date: Wed, 01 Mar 2017 22:57:24 GMT
+< Connection: keep-alive
+< Set-Cookie: _AVESTA_ENVIRONMENT=prod; path=/
+< 
+* Connection #42 to host us15.api.mailchimp.com left intact
+
+[01-Mar-2017 22:57:24 UTC] Completed in 73.61ms
+[01-Mar-2017 22:57:24 UTC] Got response: {"success_count":0,"error_count":1,"errors":[{"email":{"email":"z.o.r.ganon33@gmail.com"},"error":"The id passed does not exist on this list","code":232}],"data":[]}
+[01-Mar-2017 22:57:24 UTC] Call to https://us15.api.mailchimp.com/2.0/lists/subscribe.json: {"id":"0b75f49a41","email":{"email":"z.o.r.ganon33@gmail.com"},"merge_vars":{"FNAME":"Barb","LNAME":"Test","optin_ip":"10.240.1.32","optin_time":"2017-03-01 22:57:24"},"email_type":"html","double_optin":false,"update_existing":true,"replace_interests":true,"send_welcome":false,"apikey":"b70e2c482f96763d147c271d4a194cfb-us15"}
+[01-Mar-2017 22:57:24 UTC] * Found bundle for host us15.api.mailchimp.com: 0x5564b9508260
+* Re-using existing connection! (#42) with host us15.api.mailchimp.com
+* Connected to us15.api.mailchimp.com (23.199.205.106) port 443 (#42)
+> POST /2.0/lists/subscribe.json HTTP/1.1
+User-Agent: MailChimp-PHP/2.0.5
+Host: us15.api.mailchimp.com
+Accept: */*
+Content-Type: application/json
+Content-Length: 327
+
+* upload completely sent off: 327 out of 327 bytes
+< HTTP/1.1 200 OK
+* Server openresty is not blacklisted
+< Server: openresty
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 73
+< Vary: Accept-Encoding
+< Date: Wed, 01 Mar 2017 22:57:24 GMT
+< Connection: keep-alive
+< Set-Cookie: _AVESTA_ENVIRONMENT=prod; path=/
+< 
+* Connection #42 to host us15.api.mailchimp.com left intact
+
+[01-Mar-2017 22:57:24 UTC] Completed in 124.92ms
+[01-Mar-2017 22:57:24 UTC] Got response: {"email":"z.o.r.ganon33@gmail.com","euid":"bb2703dd29","leid":"37500955"}
+[01-Mar-2017 23:31:02 UTC] Call to https://us15.api.mailchimp.com/2.0/helper/ping.json: {"apikey":"b70e2c482f96763d147c271d4a194cfb-us15"}
+[01-Mar-2017 23:31:02 UTC] * Hostname was NOT found in DNS cache
+*   Trying 23.203.60.238...
+* Connected to us15.api.mailchimp.com (23.203.60.238) port 443 (#50)
+* successfully set certificate verify locations:
+*   CAfile: none
+  CApath: /etc/ssl/certs
+* SSL connection using ECDHE-ECDSA-AES256-GCM-SHA384
+* Server certificate:
+* 	 subject: C=US; ST=Georgia; L=Atlanta; O=The Rocket Science Group, LLC; OU=IT; CN=wildcardsan.us15.list-manage.com
+* 	 start date: 2017-02-17 00:00:00 GMT
+* 	 expire date: 2018-02-17 23:59:59 GMT
+* 	 subjectAltName: us15.api.mailchimp.com matched
+* 	 issuer: C=US; O=Symantec Corporation; OU=Symantec Trust Network; CN=Symantec Class 3 ECC 256 bit SSL CA - G2
+* 	 SSL certificate verify ok.
+> POST /2.0/helper/ping.json HTTP/1.1
+User-Agent: MailChimp-PHP/2.0.5
+Host: us15.api.mailchimp.com
+Accept: */*
+Content-Type: application/json
+Content-Length: 50
+
+* upload completely sent off: 50 out of 50 bytes
+< HTTP/1.1 200 OK
+* Server openresty is not blacklisted
+< Server: openresty
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 30
+< Vary: Accept-Encoding
+< Date: Wed, 01 Mar 2017 23:31:02 GMT
+< Connection: keep-alive
+< Set-Cookie: _AVESTA_ENVIRONMENT=prod; path=/
+< 
+* Connection #50 to host us15.api.mailchimp.com left intact
+
+[01-Mar-2017 23:31:02 UTC] Completed in 197.15ms
+[01-Mar-2017 23:31:02 UTC] Got response: {"msg":"Everything's Chimpy!"}
+[01-Mar-2017 23:31:02 UTC] Call to https://us15.api.mailchimp.com/2.0/lists/list.json: {"filters":[],"start":0,"limit":25,"sort_field":"created","sort_dir":"DESC","apikey":"b70e2c482f96763d147c271d4a194cfb-us15"}
+[01-Mar-2017 23:31:02 UTC] * Found bundle for host us15.api.mailchimp.com: 0x5564ba37c360
+* Re-using existing connection! (#50) with host us15.api.mailchimp.com
+* Connected to us15.api.mailchimp.com (23.203.60.238) port 443 (#50)
+> POST /2.0/lists/list.json HTTP/1.1
+User-Agent: MailChimp-PHP/2.0.5
+Host: us15.api.mailchimp.com
+Accept: */*
+Content-Type: application/json
+Content-Length: 125
+
+* upload completely sent off: 125 out of 125 bytes
+< HTTP/1.1 200 OK
+* Server openresty is not blacklisted
+< Server: openresty
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 938
+< Vary: Accept-Encoding
+< Date: Wed, 01 Mar 2017 23:31:02 GMT
+< Connection: keep-alive
+< Set-Cookie: _AVESTA_ENVIRONMENT=prod; path=/
+< 
+* Connection #50 to host us15.api.mailchimp.com left intact
+
+[01-Mar-2017 23:31:02 UTC] Completed in 106.40ms
+[01-Mar-2017 23:31:02 UTC] Got response: {"total":1,"data":[{"id":"0b75f49a41","web_id":35107,"name":"NLSC All Members","date_created":"2017-02-02 23:19:31","email_type_option":false,"use_awesomebar":true,"default_from_name":"Northern Lights Sailing Club","default_from_email":"nlsc_mail@nlsc.org","default_subject":"","default_language":"en","list_rating":0,"subscribe_url_short":"http:\/\/eepurl.com\/cD_MNf","subscribe_url_long":"http:\/\/nlsc.us15.list-manage1.com\/subscribe?u=c8e3d5b1d78491ff7b1e22444&id=0b75f49a41","beamer_address":"us15-c75ebc541c-98943b1d98@inbound.mailchimp.com","visibility":"pub","stats":{"member_count":4,"unsubscribe_count":0,"cleaned_count":0,"member_count_since_send":4,"unsubscribe_count_since_send":0,"cleaned_count_since_send":0,"campaign_count":0,"grouping_count":0,"group_count":0,"merge_var_count":2,"avg_sub_rate":0,"avg_unsub_rate":0,"target_sub_rate":0,"open_rate":0,"click_rate":0,"date_last_campaign":null},"modules":[]}],"errors":[]}

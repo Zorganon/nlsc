@@ -46,7 +46,7 @@ Version: 1.0.0
 	border: 0;
 }
 
-/* This makes the footer Sticky to the bottom of the pages */
+/* This removes the footer at the bottom of the pages */
 /* Set footer height */
 #footer-bottom {
 	display: none;

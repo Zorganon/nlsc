@@ -56,20 +56,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		$data = array( 'user_id' => $user_id, 'waiver_version' => $version, 'member_name' => $name, 'member_signature' => $signature);
 		if ($wpdb->insert( 'liability_waiver', $data )) {
 			// Email information
-			add_filter( 'wp_mail_content_type', 'text/html' );
+			
 			$email = $current_user->user_email;
 			$subject = "NLSC Liability Waiver";
-			$headers = 'From: NLSC <membership@nlsc.org>';
-			$message = "New Waiver Signed by Username: ".$userLogin;
+			$headers = array('Content-Type: text/html; charset=UTF-8; From: NLSC <membership@nlsc.org>');			
 			
 			ob_start();
 		    include get_stylesheet_directory().'/waiver-email-template.php';
-		    $message .= ob_get_contents();
+		    $message = ob_get_contents();
 		    ob_end_clean();
 				
 			wp_mail( $email, $subject, $message, $headers );
 			wp_mail( get_option('admin_email'), 'New NLSC Waiver Signed', $message, $headers );
-			remove_filter( 'wp_mail_content_type', 'text/html' );
+			
 
 			wp_redirect('https://nlsc.org');
 			exit;
